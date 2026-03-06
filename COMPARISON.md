@@ -262,7 +262,7 @@ flowchart LR
 | 2 | Copilot Studio (SPO) | ~12 (10 graph + 2 gen answer) | 15,000 | ~180,000 | 8 packs | **~$1,600** |
 | 3 | CS + Dataverse OOTB | ~2 (generative answer — Dataverse search, NOT graph) | 15,000 | ~30,000 | 2 packs | **~$400** |
 | 4 | CS + Dataverse Custom | ~7 (2 gen + 5 action) | 15,000 | ~105,000 | 5 packs | **~$1,000** |
-| 5 | Declarative Agent + AI Search | N/A — **requires Copilot license**, no consumption option. 250 users only, $0 incremental (no graph grounding — API plugin calls MCP server directly) | — | — | — | **$0** |
+| 5 | Declarative Agent + AI Search | $0 — **free for all M365 users** (no Copilot license required). API plugin calls MCP server directly, no graph grounding, no Copilot Credits. | — | — | — | **$0** |
 | 6 | CS + MCP → AI Search | ~7 (2 gen + 5 MCP tool call as agent action) | 15,000 | ~105,000 | 5 packs | **~$1,000** |
 | 7 | Foundry Agent | N/A — accessed via API, not M365 | — | — | — | **$0** |
 | 8 | M365 Agents SDK | N/A — accessed via Teams bot (Bot Framework) | — | — | — | **$0** |
@@ -310,11 +310,11 @@ flowchart LR
 
 > **Important notes:**  
 > - The 250 M365 Copilot licensed users ($7,500/month) are a **sunk cost** — already paid regardless of which agent is deployed. Not included in the table above.  
-> - **#5 (Declarative Agent + AI Search) has $0 M365 cost** — the API plugin calls the MCP server directly, no tenant graph grounding. Only Copilot-licensed users (250) can use it, and for them it's included. No Copilot Credits consumed.  
+> - **#5 (Declarative Agent + AI Search) has $0 M365 cost for all 1,000 users** — declarative agents are free for all M365 users (no Copilot license required). The API plugin calls the MCP server directly — no tenant graph grounding, no Copilot Credits consumed.  
 > - Agents #7 and #8 bypass M365 Copilot entirely (API/Bot Framework access), so no Copilot Credits needed for any user.  
 > - Agents #1 and #2 both use **tenant graph grounding** (10 credits/query) for SPO search — same cost.  
 > - **Dataverse storage is the hidden cost killer** for #3 and #4 — Dataverse search indexes are billed at ~$40/GB (database rate), not $2.50/GB (file rate). For 100 GB of docs, indexes can cost $1,200–2,000/month alone.  
-> - Agent #6 (Copilot Studio + MCP) is cheaper than #5 in Copilot Credits but #5 serves only 250 users at $0 while #6 serves all 1,000.
+> - Agent #6 (Copilot Studio + MCP) costs ~$1,000/month in Copilot Credits for non-licensed users, while #5 (Declarative Agent) serves all 1,000 users at $0 M365 cost.
 
 ---
 
@@ -383,7 +383,7 @@ flowchart TD
 | Insight | Details |
 |---------|---------|
 | **Cheapest overall** | Foundry Agent (#7) at ~$240/month — no M365 licensing, no Copilot Credits, moderate quality |
-| **Cheapest for Copilot users** | Declarative Agent + AI Search (#5) at ~$420/month — $0 M365 cost (no graph grounding), excellent quality, limited to 250 Copilot-licensed users |
+| **Cheapest for Copilot users** | Declarative Agent + AI Search (#5) at ~$420/month — $0 M365 cost (free for all 1,000 users, no graph grounding), excellent quality |
 | **Best search quality** | AI Search-backed agents (#5, #6, #8) — hybrid search + semantic reranking + query rewriting |
 | **Best balance** | Foundry Agent (#7) — ~$240/month, good quality, built-in evaluation and monitoring, no Copilot Credits needed |
 | **Hidden cost of "free" agents** | Both Agent Builder (#1) AND Copilot Studio SPO (#2) cost ~$1,600/month each in Copilot Credits — SPO uses tenant graph grounding by default (10 credits/query) |
