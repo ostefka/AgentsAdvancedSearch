@@ -230,25 +230,43 @@ flowchart LR
 
 > **Assumptions:**  
 > - 1,000 M365 users, 250 with M365 Copilot license ($30/user/month)  
-> - Copilot Studio messages included with Copilot license (10K messages/month/tenant baseline)  
-> - Moderate usage: ~5,000 queries/month across all users  
+> - 750 users WITHOUT Copilot license → use agents via **Copilot Credits** (consumption model)  
+> - Copilot Credits pricing: prepaid pack ~$200/25K credits or pay-as-you-go via Azure subscription  
+> - M365 Copilot licensed users: agent usage is **included at no extra charge**  
+> - Moderate usage: ~5,000 queries/month total (~1,250 from licensed users, ~3,750 from non-licensed users)  
 > - Azure pricing: Sweden Central region, pay-as-you-go  
-> - All prices are estimated monthly costs (USD)
+> - All prices are estimated **incremental** monthly costs (USD)
 
-### M365 / Power Platform Costs
+### Copilot Credits — How It Works
 
-| # | Agent | M365 Copilot Cost | Copilot Studio Cost | Power Platform / Dataverse | Subtotal (M365 side) |
-|---|-------|-------------------|--------------------|--------------------------|--------------------|
-| 1 | Agent Builder (SPO) | Included with Copilot license | — | — | **$0** (included) |
-| 2 | Copilot Studio (SPO) | Included with Copilot license | Included (within message quota) | — | **$0** (included) |
-| 3 | CS + Dataverse OOTB | Included | Included | Dataverse storage ~$40/GB/month | **~$40–120** |
-| 4 | CS + Dataverse Custom | Included | Included | Dataverse + Power Automate premium ~$15/user/month or pay-per-flow | **~$100–500** |
-| 5 | Declarative Agent + AI Search | Included with Copilot license | — | — | **$0** (included) |
-| 6 | CS + MCP → AI Search | Included | Included (within message quota) | — | **$0** (included) |
-| 7 | Foundry Agent | N/A (standalone) | — | — | **$0** |
-| 8 | M365 Agents SDK | N/A (uses Bot Framework) | — | — | **$0** |
+| Billing Item | Credits per Event | M365 Copilot Licensed User |
+|---|---|---|
+| Classic answer (static response) | 1 credit | Free (included) |
+| Generative answer (AI-generated) | 2 credits | Free (included) |
+| Agent action (trigger, reasoning) | 5 credits | Free (included) |
+| Tenant graph grounding (RAG over M365 data) | 10 credits | Free (included) |
+| Agent flow actions (per 100 actions) | 13 credits | Free (included) |
 
-### Azure Costs
+> **Key rule:** For M365 Copilot licensed users (250), all agent interactions in M365 Copilot, Teams, or SharePoint are **zero-rated** — no Copilot Credits consumed. The 750 non-licensed users consume Copilot Credits at the rates above.  
+> **Agent Builder exception:** Generative answers in Agent Builder agents are free even for non-licensed users, **unless** the agent uses tenant graph grounding.  
+> **Source:** [Copilot Studio billing rates](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)
+
+### Copilot Credits Estimate for 750 Non-Licensed Users
+
+| # | Agent | Credits per Query (est.) | Queries/Month (750 users) | Total Credits/Month | Packs Needed (~$200/25K) | **Monthly Cost** |
+|---|-------|--------------------------|--------------------------|--------------------|--------------------------|----|
+| 1 | Agent Builder (SPO) | ~12 (10 graph + 2 gen answer) | 3,750 | ~45,000 | 2 packs | **~$400** |
+| 2 | Copilot Studio (SPO) | ~2 (generative answer, no graph) | 3,750 | ~7,500 | 1 pack | **~$200** |
+| 3 | CS + Dataverse OOTB | ~2 (generative answer) | 3,750 | ~7,500 | 1 pack | **~$200** |
+| 4 | CS + Dataverse Custom | ~7 (2 gen + 5 action) | 3,750 | ~26,250 | 2 packs | **~$400** |
+| 5 | Declarative Agent + AI Search | ~17 (10 graph + 2 gen + 5 action) | 3,750 | ~63,750 | 3 packs | **~$600** |
+| 6 | CS + MCP → AI Search | ~7 (2 gen + 5 action) | 3,750 | ~26,250 | 2 packs | **~$400** |
+| 7 | Foundry Agent | N/A — accessed via API, not M365 | — | — | — | **$0** |
+| 8 | M365 Agents SDK | N/A — accessed via Teams bot (Bot Framework) | — | — | — | **$0** |
+
+> ⚠️ Credit consumption varies significantly based on agent design. Use the [Microsoft Copilot Studio agent usage estimator](https://microsoft.github.io/copilot-studio-estimator/) for precise estimates.
+
+### Azure Infrastructure Costs
 
 | # | Agent | AI Search | Azure OpenAI | Compute | Networking | Other | Subtotal (Azure) |
 |---|-------|-----------|-------------|---------|------------|-------|-----------------|
@@ -261,20 +279,31 @@ flowchart LR
 | 7 | Foundry Agent | Basic: ~$75 or S1: ~$250 | ~$50–100 (GPT-4o + embeddings) | Foundry hosting: included | — | Foundry project: ~$0 (pay per use) | **~$125–350** |
 | 8 | M365 Agents SDK | S1: ~$250 | ~$30–50 | App Service B1: ~$55 | — | Bot Service: free (standard) | **~$335–355** |
 
+### Dataverse / Power Platform Costs
+
+| # | Agent | Dataverse Storage | Power Automate | Subtotal |
+|---|-------|------------------|---------------|----------|
+| 3 | CS + Dataverse OOTB | ~$40–120/month (1–3 GB) | — | **~$40–120** |
+| 4 | CS + Dataverse Custom | ~$40–120/month (1–3 GB) | Premium connectors ~$15/user or pay-per-flow | **~$100–300** |
+
 ### Total Monthly Cost Summary
 
-| # | Agent | M365 Cost | Azure Cost | **Total Monthly** | Annual |
-|---|-------|-----------|------------|-------------------|--------|
-| 1 | Agent Builder (SPO) | $0 | $0 | **$0** | **$0** |
-| 2 | Copilot Studio (SPO) | $0 | $0 | **$0** | **$0** |
-| 3 | CS + Dataverse OOTB | ~$80 | $0 | **~$80** | **~$960** |
-| 4 | CS + Dataverse Custom | ~$300 | ~$10 | **~$310** | **~$3,720** |
-| 5 | Declarative Agent + AI Search | $0 | ~$420 | **~$420** | **~$5,040** |
-| 6 | CS + MCP → AI Search | $0 | ~$420 | **~$420** | **~$5,040** |
-| 7 | Foundry Agent | $0 | ~$240 | **~$240** | **~$2,880** |
-| 8 | M365 Agents SDK | $0 | ~$345 | **~$345** | **~$4,140** |
+| # | Agent | Copilot Credits (750 users) | Azure Infra | Dataverse/PP | **Total Monthly** | **Annual** |
+|---|-------|-----------------------------|-------------|--------------|-------------------|------------|
+| 1 | Agent Builder (SPO) | ~$400 | $0 | $0 | **~$400** | **~$4,800** |
+| 2 | Copilot Studio (SPO) | ~$200 | $0 | $0 | **~$200** | **~$2,400** |
+| 3 | CS + Dataverse OOTB | ~$200 | $0 | ~$80 | **~$280** | **~$3,360** |
+| 4 | CS + Dataverse Custom | ~$400 | ~$10 | ~$200 | **~$610** | **~$7,320** |
+| 5 | Declarative Agent + AI Search | ~$600 | ~$420 | $0 | **~$1,020** | **~$12,240** |
+| 6 | CS + MCP → AI Search | ~$400 | ~$420 | $0 | **~$820** | **~$9,840** |
+| 7 | Foundry Agent | $0 | ~$240 | $0 | **~$240** | **~$2,880** |
+| 8 | M365 Agents SDK | $0 | ~$345 | $0 | **~$345** | **~$4,140** |
 
-> **Note:** Agents #1, #2, #5, and #6 show $0 for M365 costs because they leverage the existing M365 Copilot license ($30/user/month × 250 users = $7,500/month already paid). The incremental cost of adding these agents is $0 on the M365 side.
+> **Important notes:**  
+> - The 250 M365 Copilot licensed users ($7,500/month) are a **sunk cost** — already paid regardless of which agent is deployed. Not included in the table above.  
+> - Agents #7 and #8 bypass M365 Copilot entirely (API/Bot Framework access), so no Copilot Credits needed for any user.  
+> - Agent #1 costs more in Copilot Credits than #2 because Agent Builder uses **tenant graph grounding** (10 credits/query) to search SPO via the M365 index.  
+> - Agent #6 (Copilot Studio + MCP) is cheaper than #5 (Declarative Agent) because Copilot Studio agents don't use tenant graph grounding — the MCP server handles search directly.
 
 ---
 
@@ -284,14 +313,14 @@ flowchart LR
 
 | # | Agent | Setup Effort | Maintenance | Output Quality | Ingestion Flexibility | Cost Efficiency | **Total /25** |
 |---|-------|:----------:|:-----------:|:-------------:|:--------------------:|:--------------:|:--------:|
-| 1 | Agent Builder (SPO) | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐ 3 | ⭐ 1 | ⭐⭐⭐⭐⭐ 5 | **19** |
+| 1 | Agent Builder (SPO) | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐ 3 | ⭐ 1 | ⭐⭐⭐⭐ 4 | **18** |
 | 2 | Copilot Studio (SPO) | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐ 2 | ⭐ 1 | ⭐⭐⭐⭐⭐ 5 | **18** |
 | 3 | CS + Dataverse OOTB | ⭐⭐⭐⭐ 4 | ⭐⭐⭐⭐ 4 | ⭐⭐ 2 | ⭐⭐ 2 | ⭐⭐⭐⭐ 4 | **16** |
 | 4 | CS + Dataverse Custom | ⭐⭐⭐ 3 | ⭐⭐⭐ 3 | ⭐⭐⭐ 3 | ⭐⭐⭐ 3 | ⭐⭐⭐ 3 | **15** |
-| 5 | Declarative Agent + AI Search | ⭐⭐ 2 | ⭐⭐ 2 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐ 2 | **16** |
+| 5 | Declarative Agent + AI Search | ⭐⭐ 2 | ⭐⭐ 2 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐⭐ 5 | ⭐ 1 | **15** |
 | 6 | CS + MCP → AI Search | ⭐⭐ 2 | ⭐⭐ 2 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐ 2 | **16** |
-| 7 | Foundry Agent | ⭐⭐⭐ 3 | ⭐⭐⭐ 3 | ⭐⭐⭐⭐ 4 | ⭐⭐⭐⭐ 4 | ⭐⭐⭐ 3 | **17** |
-| 8 | M365 Agents SDK | ⭐ 1 | ⭐ 1 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐ 2 | **14** |
+| 7 | Foundry Agent | ⭐⭐⭐ 3 | ⭐⭐⭐ 3 | ⭐⭐⭐⭐ 4 | ⭐⭐⭐⭐ 4 | ⭐⭐⭐⭐ 4 | **18** |
+| 8 | M365 Agents SDK | ⭐ 1 | ⭐ 1 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐ 3 | **15** |
 
 ---
 
@@ -342,13 +371,14 @@ flowchart TD
 
 | Insight | Details |
 |---------|---------|
-| **Cheapest & fastest** | Agent Builder (#1) — zero cost, zero code, sub-1-hour setup |
+| **Cheapest & fastest** | Copilot Studio SPO (#2) — ~$200/month for 1,000 users, zero code, sub-1-day setup |
 | **Best search quality** | AI Search-backed agents (#5, #6, #8) — hybrid search + semantic reranking + query rewriting |
-| **Best balance** | Foundry Agent (#7) — moderate cost, good quality, built-in evaluation and monitoring |
-| **Sweet spot for Copilot orgs** | Agent Builder for quick wins → Declarative Agent + AI Search when quality matters |
-| **#5 vs #6 are identical backend** | Same MCP server + AI Search infra, different front-end (M365 Copilot vs Copilot Studio) |
-| **Dataverse path is a middle ground** | Better than raw SPO search, cheaper than AI Search, but limited ingestion |
-| **Custom Engine Agent (#8)** | Maximum control but highest setup/maintenance — justified only when Teams-native UX customization is critical |
+| **Best balance** | Foundry Agent (#7) — ~$240/month, good quality, built-in evaluation and monitoring, no Copilot Credits needed |
+| **Hidden cost of "free" agents** | Agent Builder (#1) costs ~$400/month in Copilot Credits for non-licensed users due to tenant graph grounding (10 credits/query) |
+| **#5 vs #6 — same backend, different cost** | Same MCP server + AI Search infra, but #5 (Declarative Agent) costs ~$200/month MORE in Copilot Credits due to tenant graph grounding |
+| **Bypass Copilot Credits entirely** | Foundry Agent (#7) and M365 Agents SDK (#8) are accessed via API/Bot Framework — no per-user M365 licensing needed |
+| **Copilot license = zero marginal cost** | For the 250 Copilot-licensed users, ALL M365-based agents (#1–6) are completely free — zero credits consumed |
+| **Scale matters** | At 1,000 users, Copilot Credits for M365 agents can exceed Azure infrastructure costs |
 
 ---
 
