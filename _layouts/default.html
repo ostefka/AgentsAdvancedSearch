@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page.title | default: site.title }}</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown.min.css">
+  <style>
+    body { max-width: 1200px; margin: 0 auto; padding: 2rem; background: #0d1117; color: #c9d1d9; }
+    .markdown-body { background: #0d1117; color: #c9d1d9; }
+    .markdown-body table { display: table; width: 100%; }
+    .markdown-body table th, .markdown-body table td { background: #161b22; border-color: #30363d; }
+    .markdown-body table tr:nth-child(2n) { background: #1c2128; }
+    .markdown-body h1, .markdown-body h2, .markdown-body h3 { border-color: #30363d; color: #e6edf3; }
+    .markdown-body a { color: #58a6ff; }
+    .markdown-body blockquote { border-left-color: #3b82f6; color: #8b949e; }
+    .markdown-body code { background: #1c2128; color: #e6edf3; }
+    .markdown-body pre { background: #161b22; }
+    .mermaid { background: #fff; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+  </style>
+</head>
+<body class="markdown-body">
+  {{ content }}
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    // Convert ```mermaid code blocks to mermaid divs
+    document.querySelectorAll('pre code.language-mermaid').forEach(el => {
+      const div = document.createElement('div');
+      div.className = 'mermaid';
+      div.textContent = el.textContent;
+      el.parentElement.replaceWith(div);
+    });
+    mermaid.run();
+  </script>
+</body>
+</html>
