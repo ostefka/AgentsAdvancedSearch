@@ -262,8 +262,8 @@ flowchart LR
 | 2 | Copilot Studio (SPO) | ~12 (10 graph + 2 gen answer) | 15,000 | ~180,000 | 8 packs | **~$1,600** |
 | 3 | CS + Dataverse OOTB | ~2 (generative answer — Dataverse search, NOT graph) | 15,000 | ~30,000 | 2 packs | **~$400** |
 | 4 | CS + Dataverse Custom | ~7 (2 gen + 5 action) | 15,000 | ~105,000 | 5 packs | **~$1,000** |
-| 5 | Declarative Agent + AI Search | ~17 (10 graph + 2 gen + 5 action) | 15,000 | ~255,000 | 11 packs | **~$2,200** |
-| 6 | CS + MCP → AI Search | ~7 (2 gen + 5 action) | 15,000 | ~105,000 | 5 packs | **~$1,000** |
+| 5 | Declarative Agent + AI Search | N/A — **requires Copilot license**, no consumption option. 250 users only, $0 incremental (no graph grounding — API plugin calls MCP server directly) | — | — | — | **$0** |
+| 6 | CS + MCP → AI Search | ~7 (2 gen + 5 MCP tool call as agent action) | 15,000 | ~105,000 | 5 packs | **~$1,000** |
 | 7 | Foundry Agent | N/A — accessed via API, not M365 | — | — | — | **$0** |
 | 8 | M365 Agents SDK | N/A — accessed via Teams bot (Bot Framework) | — | — | — | **$0** |
 
