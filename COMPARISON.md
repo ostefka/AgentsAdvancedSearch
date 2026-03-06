@@ -340,18 +340,16 @@ flowchart LR
 > For use in presentations — paste into any charting tool or render with Mermaid
 
 ```mermaid
-%%{init: {'theme': 'default'}}%%
-radar-beta
-  axis Setup["Setup Effort"], Maint["Maintenance"], Quality["Output Quality"], Ingest["Ingestion"], Cost["Cost Efficiency"]
-  "Agent Builder (SPO)" : [5, 5, 3, 1, 3]
-  "Copilot Studio (SPO)" : [5, 5, 2, 1, 3]
-  CS + Dataverse OOTB : [4, 4, 2, 2, 2]
-  CS + Dataverse Custom : [3, 3, 3, 3, 1]
-  Declarative + AI Search : [2, 2, 5, 5, 4]
-  CS + MCP → AI Search : [2, 2, 5, 5, 2]
-  Foundry Agent : [3, 3, 4, 4, 3]
-  M365 Agents SDK : [1, 1, 5, 5, 2]
+xychart-beta
+  title "Cost Efficiency vs Output Quality"
+  x-axis ["AB SPO", "CS SPO", "CS DV OOTB", "CS DV Custom", "DA+AIS", "CS+MCP", "Foundry", "SDK"]
+  y-axis "Score (1-5)" 1 --> 5
+  bar [3, 3, 2, 1, 4, 2, 3, 2]
+  line [3, 2, 2, 3, 5, 5, 4, 5]
 ```
+
+> **Bar** = Cost Efficiency · **Line** = Output Quality  
+> AB=Agent Builder, CS=Copilot Studio, DV=Dataverse, DA=Declarative Agent, AIS=AI Search, SDK=M365 Agents SDK
 
 ---
 
