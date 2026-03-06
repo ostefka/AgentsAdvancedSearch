@@ -248,8 +248,9 @@ flowchart LR
 | Agent flow actions (per 100 actions) | 13 credits | Free (included) |
 
 > **Key rule:** For M365 Copilot licensed users (250), all agent interactions in M365 Copilot, Teams, or SharePoint are **zero-rated** — no Copilot Credits consumed. The 750 non-licensed users consume Copilot Credits at the rates above.  
-> **Agent Builder exception:** Generative answers in Agent Builder agents are free even for non-licensed users, **unless** the agent uses tenant graph grounding.  
-> **Source:** [Copilot Studio billing rates](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)
+> **Important:** SharePoint as a knowledge source uses **tenant graph grounding** (10 credits) by default — both in Agent Builder (#1) AND Copilot Studio (#2). This is the same M365 graph search. Turning off graph grounding reduces quality but drops to 2 credits/query.  
+> **Dataverse is different:** Dataverse knowledge source uses its own **Dataverse search** (relevance search), which is explicitly a separate feature from tenant graph grounding — billed as generative answer only (2 credits).  
+> **Source:** [Copilot Studio billing rates](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management) | [Knowledge sources](https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-copilot-studio)
 
 ### Copilot Credits Estimate for 750 Non-Licensed Users
 
@@ -258,8 +259,8 @@ flowchart LR
 | # | Agent | Credits per Query (est.) | Queries/Month (750 users) | Total Credits/Month | Packs Needed (~$200/25K) | **Monthly Cost** |
 |---|-------|--------------------------|--------------------------|--------------------|--------------------------|----|
 | 1 | Agent Builder (SPO) | ~12 (10 graph + 2 gen answer) | 15,000 | ~180,000 | 8 packs | **~$1,600** |
-| 2 | Copilot Studio (SPO) | ~2 (generative answer, no graph) | 15,000 | ~30,000 | 2 packs | **~$400** |
-| 3 | CS + Dataverse OOTB | ~2 (generative answer) | 15,000 | ~30,000 | 2 packs | **~$400** |
+| 2 | Copilot Studio (SPO) | ~12 (10 graph + 2 gen answer) | 15,000 | ~180,000 | 8 packs | **~$1,600** |
+| 3 | CS + Dataverse OOTB | ~2 (generative answer — Dataverse search, NOT graph) | 15,000 | ~30,000 | 2 packs | **~$400** |
 | 4 | CS + Dataverse Custom | ~7 (2 gen + 5 action) | 15,000 | ~105,000 | 5 packs | **~$1,000** |
 | 5 | Declarative Agent + AI Search | ~17 (10 graph + 2 gen + 5 action) | 15,000 | ~255,000 | 11 packs | **~$2,200** |
 | 6 | CS + MCP → AI Search | ~7 (2 gen + 5 action) | 15,000 | ~105,000 | 5 packs | **~$1,000** |
@@ -293,7 +294,7 @@ flowchart LR
 | # | Agent | Copilot Credits (750 users) | Azure Infra | Dataverse/PP | **Total Monthly** | **Annual** |
 |---|-------|-----------------------------|-------------|--------------|-------------------|------------|
 | 1 | Agent Builder (SPO) | ~$1,600 | $0 | $0 | **~$1,600** | **~$19,200** |
-| 2 | Copilot Studio (SPO) | ~$400 | $0 | $0 | **~$400** | **~$4,800** |
+| 2 | Copilot Studio (SPO) | ~$1,600 | $0 | $0 | **~$1,600** | **~$19,200** |
 | 3 | CS + Dataverse OOTB | ~$400 | $0 | ~$80 | **~$480** | **~$5,760** |
 | 4 | CS + Dataverse Custom | ~$1,000 | ~$10 | ~$200 | **~$1,210** | **~$14,520** |
 | 5 | Declarative Agent + AI Search | ~$2,200 | ~$420 | $0 | **~$2,620** | **~$31,440** |
@@ -315,8 +316,8 @@ flowchart LR
 
 | # | Agent | Setup Effort | Maintenance | Output Quality | Ingestion Flexibility | Cost Efficiency | **Total /25** |
 |---|-------|:----------:|:-----------:|:-------------:|:--------------------:|:--------------:|:--------:|
-| 1 | Agent Builder (SPO) | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐ 3 | ⭐ 1 | ⭐⭐⭐⭐ 4 | **18** |
-| 2 | Copilot Studio (SPO) | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐ 2 | ⭐ 1 | ⭐⭐⭐⭐⭐ 5 | **18** |
+| 1 | Agent Builder (SPO) | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐ 3 | ⭐ 1 | ⭐⭐⭐ 3 | **17** |
+| 2 | Copilot Studio (SPO) | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐ 2 | ⭐ 1 | ⭐⭐⭐ 3 | **16** |
 | 3 | CS + Dataverse OOTB | ⭐⭐⭐⭐ 4 | ⭐⭐⭐⭐ 4 | ⭐⭐ 2 | ⭐⭐ 2 | ⭐⭐⭐⭐ 4 | **16** |
 | 4 | CS + Dataverse Custom | ⭐⭐⭐ 3 | ⭐⭐⭐ 3 | ⭐⭐⭐ 3 | ⭐⭐⭐ 3 | ⭐⭐⭐ 3 | **15** |
 | 5 | Declarative Agent + AI Search | ⭐⭐ 2 | ⭐⭐ 2 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐⭐ 5 | ⭐ 1 | **15** |
@@ -334,8 +335,8 @@ flowchart LR
 %%{init: {'theme': 'default'}}%%
 radar-beta
   axis Setup["Setup Effort"], Maint["Maintenance"], Quality["Output Quality"], Ingest["Ingestion"], Cost["Cost Efficiency"]
-  "Agent Builder (SPO)" : [5, 5, 3, 1, 5]
-  "Copilot Studio (SPO)" : [5, 5, 2, 1, 5]
+  "Agent Builder (SPO)" : [5, 5, 3, 1, 3]
+  "Copilot Studio (SPO)" : [5, 5, 2, 1, 3]
   CS + Dataverse OOTB : [4, 4, 2, 2, 4]
   CS + Dataverse Custom : [3, 3, 3, 3, 3]
   Declarative + AI Search : [2, 2, 5, 5, 2]
@@ -373,14 +374,14 @@ flowchart TD
 
 | Insight | Details |
 |---------|---------|
-| **Cheapest & fastest** | Copilot Studio SPO (#2) — ~$400/month for 1,000 users, zero code, sub-1-day setup |
+| **Cheapest & fastest** | Copilot Studio + Dataverse OOTB (#3) — ~$480/month, no Azure infra, Dataverse search avoids graph grounding costs |
 | **Best search quality** | AI Search-backed agents (#5, #6, #8) — hybrid search + semantic reranking + query rewriting |
 | **Best balance** | Foundry Agent (#7) — ~$240/month, good quality, built-in evaluation and monitoring, no Copilot Credits needed |
-| **Hidden cost of "free" agents** | Agent Builder (#1) costs ~$1,600/month in Copilot Credits for non-licensed users due to tenant graph grounding (10 credits/query) |
+| **Hidden cost of "free" agents** | Both Agent Builder (#1) AND Copilot Studio SPO (#2) cost ~$1,600/month each in Copilot Credits — SPO uses tenant graph grounding by default (10 credits/query) |
 | **#5 vs #6 — same backend, different cost** | Same MCP server + AI Search infra, but #5 (Declarative Agent) costs ~$1,200/month MORE in Copilot Credits due to tenant graph grounding |
 | **Bypass Copilot Credits entirely** | Foundry Agent (#7) and M365 Agents SDK (#8) are accessed via API/Bot Framework — no per-user M365 licensing needed |
 | **Copilot license = zero marginal cost** | For the 250 Copilot-licensed users, ALL M365-based agents (#1–6) are completely free — zero credits consumed |
-| **Scale matters** | At 1,000 users, Copilot Credits for M365 agents can exceed Azure infrastructure costs |
+| **Dataverse = cheaper search** | Dataverse search is separate from tenant graph grounding — only 2 credits/query vs 12 for SPO-backed agents |
 
 ---
 
