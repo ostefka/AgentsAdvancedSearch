@@ -211,6 +211,23 @@ flowchart LR
 
 ---
 
+### Content Filtering / Responsible AI
+
+| # | Agent | Content Filter Type | Configurability | Indirect Prompt Injection Protection | Impact on Enterprise Docs |
+|---|-------|--------------------|-----------------|------------------------------------|--------------------------|
+| 1 | Agent Builder (SPO) | Microsoft built-in RAI | ❌ None | Mandatory, non-configurable | May block legitimate doc content |
+| 2 | Copilot Studio (SPO) | Microsoft built-in RAI | ⚠️ Content moderation slider (High→Low) | Mandatory, non-configurable | May block legitimate doc content |
+| 3 | CS + Dataverse OOTB | Microsoft built-in RAI | ⚠️ Content moderation slider | Mandatory, non-configurable | May block legitimate doc content |
+| 4 | CS + Dataverse Kit | Microsoft built-in RAI | ⚠️ Content moderation slider | Mandatory, non-configurable | May block legitimate doc content |
+| 5 | Declarative Agent + AI Search | Azure OpenAI content filters | ✅ Configurable per deployment | Configurable in Azure OpenAI | Full control — can adjust thresholds |
+| 6 | CS + MCP → AI Search | Dual: CS RAI (response) + Azure OpenAI (search) | ⚠️ Partial — CS side is fixed, Azure side is configurable | CS-side mandatory | CS filters may still block results |
+| 7 | Foundry Agent | Azure OpenAI + Foundry safety | ✅ Configurable content filters | Configurable | Good control |
+| 8 | M365 Agents SDK | Azure OpenAI content filters | ✅ Fully configurable | Configurable or custom implementation | Full control |
+
+> ⚠️ **Key finding:** Copilot Studio agents (#1–4, #6) enforce Microsoft's **indirect prompt injection protection** which cannot be disabled or configured. This filter can flag legitimate enterprise document content (especially non-English text, tables, or structured data) as a potential attack, blocking the agent's response. This is a significant limitation for enterprise document search scenarios.
+
+---
+
 ### Ingestion Capabilities
 
 | # | Agent | Supported Sources | Chunking Control | Metadata Enrichment | Update Frequency |
@@ -389,6 +406,7 @@ flowchart TD
 | **Bypass Copilot Credits entirely** | Foundry Agent (#7) and M365 Agents SDK (#8) are accessed via API/Bot Framework — no per-user M365 licensing needed |
 | **Copilot license = zero marginal cost** | For the 250 Copilot-licensed users, ALL M365-based agents (#1–6) are completely free — zero credits consumed |
 | **Dataverse = cheaper credits but EXPENSIVE storage** | Dataverse search avoids graph grounding (2 credits vs 12), but Dataverse search indexes at ~$40/GB make 100 GB of docs cost ~$1,450–2,250/month in storage alone |
+| **Content filtering is a deal-breaker for some** | Copilot Studio's mandatory indirect prompt injection filter blocks legitimate enterprise doc content (especially non-English, tables, structured data). AI Search-backed agents (#5, #7, #8) give full control over content filters |
 
 ---
 
