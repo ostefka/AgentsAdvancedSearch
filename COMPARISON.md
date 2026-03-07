@@ -13,7 +13,7 @@
 | 1 | **Agent Builder (SPO)** | M365 Copilot | SharePoint Online | None |
 | 2 | **Copilot Studio (SPO)** | Copilot Studio | SharePoint Online | None |
 | 3 | **Copilot Studio (SPO + Dataverse OOTB)** | Copilot Studio | SPO → Dataverse (OOTB sync) | None |
-| 4 | **Copilot Studio (SPO + Dataverse Custom)** | Copilot Studio | SPO → Dataverse (custom pipeline) | Low-code / Power Automate |
+| 4 | **Copilot Studio (SPO + Dataverse via Kit)** | Copilot Studio | SPO → Dataverse ([Copilot Studio Kit](https://learn.microsoft.com/en-us/microsoft-copilot-studio/guidance/kit-file-synchronization)) | Low-code / Power Automate |
 | 5 | **Declarative Agent + AI Search** | M365 Copilot | Azure AI Search index | Pro-code (TypeScript) |
 | 6 | **Copilot Studio + MCP → AI Search** | Copilot Studio | Azure AI Search via MCP server | Pro-code (TypeScript) |
 | 7 | **Azure AI Foundry Agent** | Azure AI Foundry | Azure AI Search / Foundry file search | Low-code + config |
@@ -69,22 +69,22 @@ flowchart LR
 
 ---
 
-### 4 — Copilot Studio + Dataverse (Custom Sync)
+### 4 — Copilot Studio + Dataverse (Copilot Studio Kit)
 
 ```mermaid
 flowchart LR
     U[User] -->|Teams / Web| CS[Copilot Studio]
-    SPO[(SharePoint Online)] -->|Power Automate / Azure Function| PA[Custom Pipeline]
-    PA -->|Chunking + Metadata| DV[(Dataverse)]
-    CS -->|Knowledge Source| DV
+    SPO[(SharePoint Online)] -->|Copilot Studio Kit<br/>Power Automate flow<br/>daily sync| DV[(Dataverse<br/>File Storage)]
+    DV -->|Dataverse Search<br/>auto-indexing| IDX[Search Index]
+    CS -->|File Knowledge Source| IDX
     CS -->|Built-in AI| LLM[Azure OpenAI]
     style CS fill:#742774,color:#fff
     style SPO fill:#036,color:#fff
     style DV fill:#107c10,color:#fff
-    style PA fill:#0066ff,color:#fff
+    style IDX fill:#107c10,color:#fff
 ```
 
-**How it works:** Custom ingestion pipeline (Power Automate or Azure Function) extracts documents from SPO, chunks them, enriches metadata, and loads into Dataverse. Gives full control over chunking strategy and metadata. Higher setup effort, better searchability.
+**How it works:** [Copilot Studio Kit](https://learn.microsoft.com/en-us/microsoft-copilot-studio/guidance/kit-overview) (open-source Power Platform solution by Microsoft Power CAT) syncs files from SPO to Dataverse file storage via a daily Power Automate flow. Dataverse search automatically indexes the file content. The Copilot Studio agent uses “Files” as its knowledge source — queries go through Dataverse search (NOT tenant graph grounding), resulting in lower latency and lower Copilot Credits cost (2 credits vs 12 for direct SPO). Supports larger files (up to 512 MB), more file types, and PDF non-text element indexing. Trade-off: daily sync means data is not real-time, and Dataverse search indexes are billed at ~$40/GB.
 
 ---
 
@@ -173,7 +173,7 @@ flowchart LR
 | 1 | Agent Builder (SPO) | Point-and-click in M365 | None | **< 1 hour** |
 | 2 | Copilot Studio (SPO) | Copilot Studio designer | Citizen developer | **< 1 day** |
 | 3 | CS + Dataverse OOTB | Studio + enable sync | Citizen developer + admin | **1–2 days** |
-| 4 | CS + Dataverse Custom | Studio + build pipeline | Power Platform + dev skills | **1–2 weeks** |
+| 4 | CS + Dataverse Kit | Studio + install Kit + configure sync | Citizen dev + PP admin | **2–5 days** |
 | 5 | Declarative Agent + AI Search | Azure infra + MCP server + agent manifest | Azure + TypeScript + Entra ID | **2–4 weeks** |
 | 6 | CS + MCP → AI Search | Azure infra + MCP server + Studio config | Azure + TypeScript + Studio | **2–4 weeks** |
 | 7 | Foundry Agent | Foundry project + index config | Azure + AI Foundry | **1–2 weeks** |
@@ -188,7 +188,7 @@ flowchart LR
 | 1 | Agent Builder (SPO) | None (SaaS) | SPO permissions only | 🟢 **Minimal** |
 | 2 | Copilot Studio (SPO) | None (SaaS) | Topic/flow updates | 🟢 **Minimal** |
 | 3 | CS + Dataverse OOTB | Dataverse storage monitoring | Sync health checks | 🟡 **Low** |
-| 4 | CS + Dataverse Custom | Pipeline + Dataverse | Pipeline failures, schema changes | 🟡 **Medium** |
+| 4 | CS + Dataverse Kit | Kit flows + Dataverse | Sync failures, Kit updates, Dataverse storage | 🟡 **Medium** |
 | 5 | Declarative Agent + AI Search | Container App, APIM, AI Search, OpenAI, Key Vault, VNet | Image updates, cert rotation, index maintenance | 🔴 **High** |
 | 6 | CS + MCP → AI Search | Container App, APIM, AI Search, OpenAI, Key Vault, VNet | Same as #5 + Studio flow updates | 🔴 **High** |
 | 7 | Foundry Agent | Foundry project, AI Search, OpenAI | Model updates, index reindexing | 🟡 **Medium** |
@@ -203,7 +203,7 @@ flowchart LR
 | 1 | Agent Builder (SPO) | M365 Index (keyword + semantic) | Good (M365 built-in) | ⭐⭐⭐ Good | ⭐⭐⭐ Links to SPO |
 | 2 | Copilot Studio (SPO) | SPO connector (keyword) | Basic | ⭐⭐ Acceptable | ⭐⭐ Links to SPO |
 | 3 | CS + Dataverse OOTB | Dataverse search | Basic-to-Good | ⭐⭐ Acceptable | ⭐⭐ Dataverse refs |
-| 4 | CS + Dataverse Custom | Dataverse search + custom metadata | Good (depends on pipeline) | ⭐⭐⭐ Good | ⭐⭐⭐ Custom metadata |
+| 4 | CS + Dataverse Kit | Dataverse search over synced files | Good (full file content indexed, incl. PDF non-text) | ⭐⭐⭐ Good | ⭐⭐⭐ File refs |
 | 5 | Declarative Agent + AI Search | Hybrid (BM25 + vector + semantic reranking) + query rewriting | Excellent | ⭐⭐⭐⭐⭐ Excellent | ⭐⭐⭐⭐ Rich metadata |
 | 6 | CS + MCP → AI Search | Hybrid + query rewriting (same engine as #5) | Excellent | ⭐⭐⭐⭐⭐ Excellent | ⭐⭐⭐⭐ Rich metadata |
 | 7 | Foundry Agent | AI Search (configurable) + optional vector store | Very Good | ⭐⭐⭐⭐ Very Good | ⭐⭐⭐ Configurable |
@@ -218,7 +218,7 @@ flowchart LR
 | 1 | Agent Builder (SPO) | SPO sites, libraries, pages | None (M365 index) | None | Automatic (M365 crawl) |
 | 2 | Copilot Studio (SPO) | SPO sites, libraries | None | None | Automatic (SPO connector) |
 | 3 | CS + Dataverse OOTB | SPO → Dataverse | Minimal (OOTB) | Basic (article schema) | Scheduled sync |
-| 4 | CS + Dataverse Custom | Any (SPO, file shares, APIs, DBs) | Full control | Full control | Custom schedule |
+| 4 | CS + Dataverse Kit | SPO (via Kit sync), supports more file types, up to 512 MB | Automatic (Dataverse search indexes file content) | Automatic (file-level metadata from SPO) | Daily sync (or on-demand) |
 | 5 | Declarative Agent + AI Search | Any (Doc Intelligence, custom indexers, push API) | Full control (chunk size, overlap, strategy) | Full control (custom fields, facets, scoring profiles) | Custom (indexer schedule or push) |
 | 6 | CS + MCP → AI Search | Same as #5 | Same as #5 | Same as #5 | Same as #5 |
 | 7 | Foundry Agent | Files (upload or blob), AI Search index, custom data | Configurable (Foundry file search or custom) | Moderate | On upload or indexer |
@@ -261,7 +261,7 @@ flowchart LR
 | 1 | Agent Builder (SPO) | ~12 (10 graph + 2 gen answer) | 15,000 | ~180,000 | 8 packs | **~$1,600** |
 | 2 | Copilot Studio (SPO) | ~12 (10 graph + 2 gen answer) | 15,000 | ~180,000 | 8 packs | **~$1,600** |
 | 3 | CS + Dataverse OOTB | ~2 (generative answer — Dataverse search, NOT graph) | 15,000 | ~30,000 | 2 packs | **~$400** |
-| 4 | CS + Dataverse Custom | ~7 (2 gen + 5 action) | 15,000 | ~105,000 | 5 packs | **~$1,000** |
+| 4 | CS + Dataverse Kit | ~2 (generative answer — Dataverse file search, NOT graph) | 15,000 | ~30,000 | 2 packs | **~$400** |
 | 5 | Declarative Agent + AI Search | $0 — **free for all M365 users** (no Copilot license required). API plugin calls MCP server directly, no graph grounding, no Copilot Credits. | — | — | — | **$0** |
 | 6 | CS + MCP → AI Search | ~7 (2 gen + 5 MCP tool call as agent action) | 15,000 | ~105,000 | 5 packs | **~$1,000** |
 | 7 | Foundry Agent | N/A — accessed via API, not M365 | — | — | — | **$0** |
@@ -276,7 +276,7 @@ flowchart LR
 | 1 | Agent Builder (SPO) | — | — | — | — | — | **$0** |
 | 2 | Copilot Studio (SPO) | — | — | — | — | — | **$0** |
 | 3 | CS + Dataverse OOTB | — | — | — | — | — | **$0** |
-| 4 | CS + Dataverse Custom | — | — | Azure Functions (consumption) | — | — | **~$5–20** |
+| 4 | CS + Dataverse Kit | — | — | — | — | — | **$0** |
 | 5 | Declarative Agent + AI Search | S1: ~$250 | ~$30–50 (embeddings + rewriting) | Container App: ~$50–100 | VNet + NAT GW: ~$40 | APIM Consumption: ~$10, Key Vault: ~$5 | **~$385–455** |
 | 6 | CS + MCP → AI Search | S1: ~$250 | ~$30–50 | Container App: ~$50–100 | VNet + NAT GW: ~$40 | APIM: ~$10, KV: ~$5 | **~$385–455** |
 | 7 | Foundry Agent | Basic: ~$75 or S1: ~$250 | ~$50–100 (GPT-4o + embeddings) | Foundry hosting: included | — | Foundry project: ~$0 (pay per use) | **~$125–350** |
@@ -293,7 +293,7 @@ flowchart LR
 | # | Agent | File Storage (100 GB docs) | Database (metadata + search indexes) | Power Automate | **Subtotal** |
 |---|-------|---------------------------|-------------------------------------|---------------|--------|
 | 3 | CS + Dataverse OOTB | ~$250 (100 GB × $2.50) | ~$1,200–2,000 (30–50 GB indexes × $40) | — | **~$1,450–2,250** |
-| 4 | CS + Dataverse Custom | ~$250 (100 GB × $2.50) | ~$1,200–2,000 (30–50 GB indexes × $40) | Premium connectors ~$15/user or pay-per-flow | **~$1,550–2,450** |
+| 4 | CS + Dataverse Kit | ~$250 (100 GB × $2.50) | ~$1,200–2,000 (30–50 GB indexes × $40) | — (Kit is free, uses existing PP license) | **~$1,450–2,250** |
 
 ### Total Monthly Cost Summary
 
@@ -302,7 +302,7 @@ flowchart LR
 | 1 | Agent Builder (SPO) | ~$1,600 | $0 | $0 | **~$1,600** | **~$19,200** |
 | 2 | Copilot Studio (SPO) | ~$1,600 | $0 | $0 | **~$1,600** | **~$19,200** |
 | 3 | CS + Dataverse OOTB | ~$400 | $0 | ~$1,850 | **~$2,250** | **~$27,000** |
-| 4 | CS + Dataverse Custom | ~$1,000 | ~$10 | ~$2,000 | **~$3,010** | **~$36,120** |
+| 4 | CS + Dataverse Kit | ~$400 | $0 | ~$1,850 | **~$2,250** | **~$27,000** |
 | 5 | Declarative Agent + AI Search | $0 | ~$865 | $0 | **~$865** | **~$10,380** |
 | 6 | CS + MCP → AI Search | ~$1,000 | ~$865 | $0 | **~$1,865** | **~$22,380** |
 | 7 | Foundry Agent | $0 | ~$240 | $0 | **~$240** | **~$2,880** |
@@ -327,7 +327,7 @@ flowchart LR
 | 1 | Agent Builder (SPO) | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐ 3 | ⭐ 1 | ⭐⭐⭐ 3 | **17** |
 | 2 | Copilot Studio (SPO) | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐ 2 | ⭐ 1 | ⭐⭐⭐ 3 | **16** |
 | 3 | CS + Dataverse OOTB | ⭐⭐⭐⭐ 4 | ⭐⭐⭐⭐ 4 | ⭐⭐ 2 | ⭐⭐ 2 | ⭐⭐ 2 | **14** |
-| 4 | CS + Dataverse Custom | ⭐⭐⭐ 3 | ⭐⭐⭐ 3 | ⭐⭐⭐ 3 | ⭐⭐⭐ 3 | ⭐ 1 | **13** |
+| 4 | CS + Dataverse Kit | ⭐⭐⭐ 3 | ⭐⭐⭐ 3 | ⭐⭐⭐ 3 | ⭐⭐ 2 | ⭐⭐ 2 | **13** |
 | 5 | Declarative Agent + AI Search | ⭐⭐ 2 | ⭐⭐ 2 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐ 4 | **18** |
 | 6 | CS + MCP → AI Search | ⭐⭐ 2 | ⭐⭐ 2 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐ 2 | **16** |
 | 7 | Foundry Agent | ⭐⭐⭐ 3 | ⭐⭐⭐ 3 | ⭐⭐⭐⭐ 4 | ⭐⭐⭐⭐ 4 | ⭐⭐⭐⭐ 4 | **18** |
@@ -342,9 +342,9 @@ flowchart LR
 ```mermaid
 xychart-beta
   title "Cost Efficiency vs Output Quality"
-  x-axis ["AB SPO", "CS SPO", "CS DV OOTB", "CS DV Custom", "DA+AIS", "CS+MCP", "Foundry", "SDK"]
+  x-axis ["AB SPO", "CS SPO", "CS DV OOTB", "CS DV Kit", "DA+AIS", "CS+MCP", "Foundry", "SDK"]
   y-axis "Score (1-5)" 1 --> 5
-  bar [3, 3, 2, 1, 4, 2, 3, 2]
+  bar [3, 3, 2, 2, 4, 2, 3, 2]
   line [3, 2, 2, 3, 5, 5, 4, 5]
 ```
 
