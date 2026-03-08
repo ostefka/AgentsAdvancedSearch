@@ -295,7 +295,7 @@ flowchart LR
 | 4 | CS + Dataverse Kit | — | — | — | — | — | **$0** |
 | 5 | Declarative Agent + AI Search | S1: ~$245 | ~$50–90 (embeddings + rewriting + answers) | Container App: ~$150 | VNet + NAT GW: ~$70 | APIM Basic v2: ~$150, KV: ~$5, Semantic ranker: ~$19 | **~$690–730** |
 | 6 | CS + MCP → AI Search | S1: ~$245 (shared w/ #5) | ~$50–90 (shared) | Container App: ~$150 (shared w/ #5) | VNet + NAT GW: ~$70 (shared) | APIM: ~$150 (shared), KV: ~$5, Semantic: ~$19 | **~$690–730** (shared w/ #5) |
-| 7 | Foundry Agent | S1: ~$245 | ~$50–100 (GPT-4o + embeddings) | Foundry hosting: included | — | Semantic ranker: ~$19 | **~$315–365** ⚠️ not enterprise-grade |
+| 7 | Foundry Agent | S1: ~$245 | ~$50–100 (GPT-4o + embeddings) | Foundry hosting: included | — | Semantic ranker: ~$19 | **~$315–365** ⚠️ see notes |
 | 8 | M365 Agents SDK | S1: ~$245 (shared w/ #5) | ~$50–90 (shared) | Container App: ~$150 | VNet + NAT GW: ~$70 (shared) | APIM: ~$150 (shared), Bot Service: free, Semantic: ~$19 | **~$840–880** |
 
 ### Dataverse / Power Platform Costs (100 GB of enterprise documents)
@@ -335,7 +335,7 @@ flowchart LR
 > **Important notes:**  
 > - The 250 M365 Copilot licensed users ($7,500/month) are a **sunk cost** — not included above.  
 > - **#5** has $0 M365 cost for all 1,000 users — declarative agents are free for all M365 users.  
-> - **#7 (Foundry) ⚠️ NOT enterprise-grade** — no APIM gateway, no VNet/IP filtering, no OBO per-user RBAC, no NAT Gateway for static IP. Uses Basic AI Search ($74) + OpenAI ($50–90) + Foundry hosting (included) + semantic ranker ($19). Suitable for PoC/internal use but lacks the 6-layer security of #5/#6/#8. To make Foundry enterprise-grade, you'd need the same APIM + VNet stack → similar cost to #5.  
+> - **#7 (Foundry) ⚠️ Enterprise gaps** — Foundry Agent Service supports VNet isolation, private endpoints, BYO resources (AI Search, Storage, Cosmos DB), and Entra Agent ID with Conditional Access. However, it has **critical gaps**: (1) AI Search tool doesn't work through VNet (documented limitation), (2) no user OBO for AI Search (managed identity only — no per-user document-level security), (3) no APIM gateway integration. The SharePoint tool DOES support user OBO. Suitable for PoC and scenarios where per-user AI Search RBAC is not required.  
 > - **#8 includes the LLM model cost** — Azure OpenAI GPT-4o-mini for query rewriting + answer generation (~$20–40/month) is in the shared OpenAI line item.  
 > - **Dataverse is the cost killer** for #3/#4 — search indexes at ~$40/GB make 100 GB of docs cost ~$1,450–2,250/month.
 
