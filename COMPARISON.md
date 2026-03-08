@@ -218,12 +218,12 @@ flowchart LR
 | 2 | Copilot Studio (SPO) | Microsoft built-in RAI | ⚠️ Content moderation slider (High→Low) | Mandatory, non-configurable | May block legitimate doc content |
 | 3 | CS + Dataverse OOTB | Microsoft built-in RAI | ⚠️ Content moderation slider | Mandatory, non-configurable | May block legitimate doc content |
 | 4 | CS + Dataverse Kit | Microsoft built-in RAI | ⚠️ Content moderation slider | Mandatory, non-configurable | May block legitimate doc content |
-| 5 | Declarative Agent + AI Search | Azure OpenAI content filters | ✅ Configurable per deployment | Configurable in Azure OpenAI | Full control — can adjust thresholds |
+| 5 | Declarative Agent + AI Search | Dual: Copilot RAI (final answer) + Azure OpenAI (search/embedding) | ⚠️ Partial — search-side configurable, but **Copilot orchestrator applies its own RAI filters on the final response** | Copilot-side mandatory, non-configurable | Copilot may still block or rephrase content from search results |
 | 6 | CS + MCP → AI Search | Dual: CS RAI (response) + Azure OpenAI (search) | ⚠️ Partial — CS side is fixed, Azure side is configurable | CS-side mandatory | CS filters may still block results |
 | 7 | Foundry Agent | Azure OpenAI + Foundry safety | ✅ Configurable content filters | Configurable | Good control |
-| 8 | M365 Agents SDK | Azure OpenAI content filters | ✅ Fully configurable | Configurable or custom implementation | Full control |
+| 8 | M365 Agents SDK | Azure OpenAI content filters only | ✅ Fully configurable | Configurable or custom implementation | **Full control — no Copilot/CS RAI overlay** |
 
-> ⚠️ **Key finding:** Copilot Studio agents (#1–4, #6) enforce Microsoft's **indirect prompt injection protection** which cannot be disabled or configured. This filter can flag legitimate enterprise document content (especially non-English text, tables, or structured data) as a potential attack, blocking the agent's response. This is a significant limitation for enterprise document search scenarios.
+> ⚠️ **Key finding:** Any agent that uses M365 Copilot orchestrator (#1–6) or Copilot Studio (#2–4, #6) for the final answer is subject to Microsoft's **mandatory indirect prompt injection protection** and RAI filters. Only **#7 (Foundry)** and **#8 (Custom Engine Agent)** generate the final answer independently, giving full control over content filtering. This is a critical distinction for enterprise document search with non-English content, tables, or structured data.
 
 ---
 
