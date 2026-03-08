@@ -204,8 +204,8 @@ flowchart LR
 |---|-------|--------------|----------------------|---------------|-----------------|
 | 1 | Agent Builder (SPO) | M365 Index (keyword + semantic) | Good (M365 built-in) | ⭐⭐⭐ Good | ⭐⭐⭐ Links to SPO |
 | 2 | Copilot Studio (SPO) | M365 semantic index (tenant graph grounding) | Good (M365 built-in, same as #1) | ⭐⭐⭐ Good | ⭐⭐⭐ Links to SPO |
-| 3 | CS + Dataverse OOTB | Dataverse search (relevance + semantic) | Good (Dataverse semantic indexes) | ⭐⭐⭐ Good | ⭐⭐ Dataverse refs |
-| 4 | CS + Dataverse Kit | Dataverse search over synced files | Good (full file content indexed, incl. PDF non-text, larger files) | ⭐⭐⭐ Good | ⭐⭐⭐ File refs |
+| 3 | CS + Dataverse OOTB | Dataverse search (relevance + semantic) | Good (Dataverse semantic indexes) | ⭐⭐⭐ Good | ⭐⭐⭐ Links to SPO |
+| 4 | CS + Dataverse Kit | Dataverse search over synced files | Good (full file content indexed, incl. PDF non-text, larger files) | ⭐⭐⭐ Good | ⭐⭐ Dataverse file refs |
 | 5 | Declarative Agent + AI Search | Hybrid (BM25 + vector + semantic reranking) + query rewriting | Excellent | ⭐⭐⭐⭐⭐ Excellent | ⭐⭐⭐⭐ Rich metadata |
 | 6 | CS + MCP → AI Search | Hybrid + query rewriting (same engine as #5) | Excellent | ⭐⭐⭐⭐⭐ Excellent | ⭐⭐⭐⭐ Rich metadata |
 | 7 | Foundry Agent | AI Search (configurable) + optional vector store | Very Good | ⭐⭐⭐⭐ Very Good | ⭐⭐⭐ Configurable |
