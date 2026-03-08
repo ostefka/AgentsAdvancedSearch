@@ -42,13 +42,12 @@ flowchart LR
 ```mermaid
 flowchart LR
     U[User] -->|Teams / Web| CS[Copilot Studio]
-    CS -->|SPO Connector| SPO[(SharePoint Online)]
-    CS -->|Built-in AI| LLM[Azure OpenAI]
+    CS -->|Tenant Graph Grounding<br/>Semantic Search| SPO[(SharePoint Online)]
     style CS fill:#742774,color:#fff
     style SPO fill:#036,color:#fff
 ```
 
-**How it works:** Copilot Studio agent with SharePoint knowledge source. Uses SPO connector to retrieve documents. Built-in generative answers with RAG. Topics and conversation flow can be customized.
+**How it works:** Copilot Studio agent with SharePoint knowledge source. Uses tenant graph grounding with semantic search to retrieve documents (same M365 index as Agent Builder). Topics and conversation flow can be customized.
 
 ---
 
@@ -59,7 +58,6 @@ flowchart LR
     U[User] -->|Teams / Web| CS[Copilot Studio]
     SPO[(SharePoint Online)] -->|OOTB Sync| DV[(Dataverse)]
     CS -->|Knowledge Source| DV
-    CS -->|Built-in AI| LLM[Azure OpenAI]
     style CS fill:#742774,color:#fff
     style SPO fill:#036,color:#fff
     style DV fill:#107c10,color:#fff
@@ -77,7 +75,6 @@ flowchart LR
     SPO[(SharePoint Online)] -->|Copilot Studio Kit<br/>Power Automate flow<br/>daily sync| DV[(Dataverse<br/>File Storage)]
     DV -->|Dataverse Search<br/>auto-indexing| IDX[Search Index]
     CS -->|File Knowledge Source| IDX
-    CS -->|Built-in AI| LLM[Azure OpenAI]
     style CS fill:#742774,color:#fff
     style SPO fill:#036,color:#fff
     style DV fill:#107c10,color:#fff
@@ -93,7 +90,7 @@ flowchart LR
 ```mermaid
 flowchart LR
     U[User] -->|M365 Copilot| DA[Declarative Agent]
-    DA -->|API Plugin / OpenAPI| APIM[Azure APIM]
+    DA -->|OpenAPI Plugin| APIM[Azure APIM]
     APIM -->|OAuth + IP filter| MCP[MCP Server<br/>Container App]
     MCP -->|OBO Token| AIS[(Azure AI Search)]
     MCP -->|Embeddings + Rewriting| AOAI[Azure OpenAI]
@@ -104,7 +101,7 @@ flowchart LR
     style AOAI fill:#68217a,color:#fff
 ```
 
-**How it works:** M365 Copilot declarative agent calls an API plugin backed by the MCP server. The MCP server (Container App) does OBO token exchange, hybrid search (text + vector + semantic reranking), and query rewriting via Azure OpenAI. 6-layer security. Full control over search quality.
+**How it works:** M365 Copilot declarative agent calls an OpenAPI plugin backed by the MCP server. The MCP server (Container App) does OBO token exchange, hybrid search (text + vector + semantic reranking), and query rewriting via Azure OpenAI. 6-layer security. Full control over search quality.
 
 ---
 
@@ -133,16 +130,16 @@ flowchart LR
 ```mermaid
 flowchart LR
     U[User] -->|API / Teams| FA[Foundry Agent]
-    FA -->|Built-in Tool| AIS[(Azure AI Search)]
+    SPO[(SharePoint Online)] -->|Foundry IQ<br/>SPO Connector<br/>indexed into AI Search| AIS[(Azure AI Search)]
+    FA -->|Foundry IQ<br/>Knowledge Retrieval| AIS
     FA -->|LLM| AOAI[Azure OpenAI]
-    FA -->|Optional| FS[Foundry File Search]
     style FA fill:#0078d4,color:#fff
+    style SPO fill:#036,color:#fff
     style AIS fill:#e81123,color:#fff
     style AOAI fill:#68217a,color:#fff
-    style FS fill:#999,color:#fff
 ```
 
-**How it works:** Azure AI Foundry hosted agent with Azure AI Search as a tool. Foundry manages the LLM orchestration, grounding, and response generation. Can also use Foundry's built-in file search (creates its own vector store). Evaluation and monitoring built-in.
+**How it works:** Azure AI Foundry agent with Foundry IQ for knowledge retrieval. Foundry IQ ingests SPO content via SharePoint connector into an Azure AI Search index (indexed automatically). The agent queries the index at runtime via Foundry's built-in knowledge retrieval tool. Foundry manages LLM orchestration, grounding, and response generation. Evaluation and monitoring built-in. ⚠️ Not enterprise-grade: no APIM gateway, no VNet/IP filtering, no OBO per-user RBAC.
 
 ---
 
