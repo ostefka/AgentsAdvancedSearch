@@ -54,12 +54,24 @@ M365 Copilot / Teams
 - Teams channel: ✅ Enabled
 - Managed Identity: Uses `mcp-aisearch-identity` (clientId: `ae9100ce-50cc-4c28-8305-1c7eb1f2057f`)
 
-### Step 4: M365 Copilot
-- [ ] Create app package icons (color.png 192x192, outline.png 32x32)
-- [ ] Fill manifest.json with actual IDs
-- [ ] Zip app package
-- [ ] Sideload to tenant
-- [ ] Test in M365 Copilot
+### Step 4: M365 Copilot ✅
+- App manifest v1.22 with `copilotAgents.customEngineAgents`
+- Sideloaded to tenant manually
+- **Tested successfully in M365 Copilot** — agent receives Czech queries, runs hybrid search + query rewriting, returns RAG answers with citations
+
+## Issues Resolved During Deployment
+1. **Bot auth config** — `ConfigurationBotFrameworkAuthentication` needs `ConfigurationServiceClientCredentialFactory` as 2nd arg, not config in 1st arg
+2. **Missing service principal** — `az ad sp create` needed for the bot app registration (AADSTS7000229)
+3. **Missing managed identity** — Container App needed user-assigned MI for AI Search/OpenAI access
+4. **AI Search IP firewall** — temporarily disabled for testing (Container App outbound IPs differ from MCP server's NAT GW)
+5. **Wrong index name** — corrected to `spo-methodics-v1`
+6. **Wrong embedding deployment** — switched from `text-embedding` (ada-002, 1536d) to `text-embedding-3-large` (3072d) to match index
+7. **Wrong answer deployment** — switched from `gpt-4o` (doesn't exist) to `gpt-4o-mini`
+
+## AI Search Firewall Status
+- **CURRENTLY DISABLED** for testing
+- Original rules: `4.223.109.98`, `81.90.252.204`, `9.223.238.69`
+- To restore: add Container App outbound IPs to the allowed list, then re-enable firewall
 
 ## Key Decisions
 - **Framework**: Teams SDK (teamsai v2) — TypeScript, matches coffee-agent sample

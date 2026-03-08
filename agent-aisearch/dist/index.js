@@ -8,13 +8,14 @@ const botbuilder_1 = require("botbuilder");
 const bot_1 = require("./bot");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
-// Bot Framework auth configuration
-const botFrameworkAuth = new botbuilder_1.ConfigurationBotFrameworkAuthentication({}, undefined, undefined, {
+// Bot Framework auth configuration for SingleTenant
+const credentialFactory = new botbuilder_1.ConfigurationServiceClientCredentialFactory({
     MicrosoftAppId: process.env.BOT_ID || "",
     MicrosoftAppPassword: process.env.BOT_PASSWORD || "",
     MicrosoftAppType: "SingleTenant",
     MicrosoftAppTenantId: process.env.BOT_TENANT_ID || "",
 });
+const botFrameworkAuth = new botbuilder_1.ConfigurationBotFrameworkAuthentication({}, credentialFactory);
 const adapter = new botbuilder_1.CloudAdapter(botFrameworkAuth);
 // Error handler
 adapter.onTurnError = async (context, error) => {

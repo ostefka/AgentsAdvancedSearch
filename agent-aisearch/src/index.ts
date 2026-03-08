@@ -2,23 +2,24 @@ import express from "express";
 import {
   CloudAdapter,
   ConfigurationBotFrameworkAuthentication,
+  ConfigurationServiceClientCredentialFactory,
 } from "botbuilder";
 import { SearchAgentBot } from "./bot";
 
 const app = express();
 app.use(express.json());
 
-// Bot Framework auth configuration
+// Bot Framework auth configuration for SingleTenant
+const credentialFactory = new ConfigurationServiceClientCredentialFactory({
+  MicrosoftAppId: process.env.BOT_ID || "",
+  MicrosoftAppPassword: process.env.BOT_PASSWORD || "",
+  MicrosoftAppType: "SingleTenant",
+  MicrosoftAppTenantId: process.env.BOT_TENANT_ID || "",
+});
+
 const botFrameworkAuth = new ConfigurationBotFrameworkAuthentication(
   {},
-  undefined,
-  undefined,
-  {
-    MicrosoftAppId: process.env.BOT_ID || "",
-    MicrosoftAppPassword: process.env.BOT_PASSWORD || "",
-    MicrosoftAppType: "SingleTenant",
-    MicrosoftAppTenantId: process.env.BOT_TENANT_ID || "",
-  } as any
+  credentialFactory
 );
 
 const adapter = new CloudAdapter(botFrameworkAuth);
