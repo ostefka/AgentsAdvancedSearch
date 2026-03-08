@@ -293,10 +293,10 @@ flowchart LR
 | 2 | Copilot Studio (SPO) | — | — | — | — | — | **$0** |
 | 3 | CS + Dataverse OOTB | — | — | — | — | — | **$0** |
 | 4 | CS + Dataverse Kit | — | — | — | — | — | **$0** |
-| 5 | Declarative Agent + AI Search | S1: ~$250 | ~$30–50 (embeddings + rewriting) | Container App: ~$50–100 | VNet + NAT GW: ~$40 | APIM Consumption: ~$10, Key Vault: ~$5 | **~$385–455** |
-| 6 | CS + MCP → AI Search | S1: ~$250 | ~$30–50 | Container App: ~$50–100 | VNet + NAT GW: ~$40 | APIM: ~$10, KV: ~$5 | **~$385–455** |
-| 7 | Foundry Agent | Basic: ~$75 or S1: ~$250 | ~$50–100 (GPT-4o + embeddings) | Foundry hosting: included | — | Foundry project: ~$0 (pay per use) | **~$125–350** |
-| 8 | M365 Agents SDK | S1: ~$250 | ~$30–50 | App Service B1: ~$55 | — | Bot Service: free (standard) | **~$335–355** |
+| 5 | Declarative Agent + AI Search | S1: ~$245 | ~$50–90 (embeddings + rewriting + answers) | Container App: ~$150 | VNet + NAT GW: ~$70 | APIM Basic v2: ~$150, KV: ~$5, Semantic ranker: ~$19 | **~$690–730** |
+| 6 | CS + MCP → AI Search | S1: ~$245 (shared w/ #5) | ~$50–90 (shared) | Container App: ~$150 (shared w/ #5) | VNet + NAT GW: ~$70 (shared) | APIM: ~$150 (shared), KV: ~$5, Semantic: ~$19 | **~$690–730** (shared w/ #5) |
+| 7 | Foundry Agent | S1: ~$245 | ~$50–100 (GPT-4o + embeddings) | Foundry hosting: included | — | Semantic ranker: ~$19 | **~$315–365** ⚠️ not enterprise-grade |
+| 8 | M365 Agents SDK | S1: ~$245 (shared w/ #5) | ~$50–90 (shared) | Container App: ~$150 | VNet + NAT GW: ~$70 (shared) | APIM: ~$150 (shared), Bot Service: free, Semantic: ~$19 | **~$840–880** (or ~$150 incremental if #5 deployed) |
 
 ### Dataverse / Power Platform Costs (100 GB of enterprise documents)
 
@@ -321,7 +321,7 @@ flowchart LR
 | 4 | CS + Dataverse Kit | ~$400 | $0 | ~$1,850 | **~$2,250** | **~$27,000** |
 | 5 | Declarative Agent + AI Search | $0 | ~$710 | $0 | **~$710** | **~$8,520** |
 | 6 | CS + MCP → AI Search | ~$1,000 | ~$710 | $0 | **~$1,710** | **~$20,520** |
-| 7 | Foundry Agent | $0 | ~$420 ⚠️ | $0 | **~$420** ⚠️ | **~$5,040** |
+| 7 | Foundry Agent | $0 | ~$340 ⚠️ | $0 | **~$340** ⚠️ | **~$4,080** |
 | 8 | M365 Agents SDK | $0 | ~$860 | $0 | **~$860** | **~$10,320** |
 
 > **How to read this table:**  
