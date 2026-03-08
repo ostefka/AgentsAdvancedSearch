@@ -373,6 +373,78 @@ xychart-beta
 
 ---
 
+## Deep Dive: #5 (Declarative Agent + MCP) vs #8 (Custom Engine Agent)
+
+> Both use the same AI Search index, same APIM, same VNet, same OpenAI. The difference is **who controls the final answer**.
+
+### Answer Generation — The Critical Difference
+
+```mermaid
+flowchart LR
+    subgraph "#5 — Declarative Agent"
+        U5[User query] --> CO[M365 Copilot<br/>Orchestrator]
+        CO -->|calls API plugin| MCP[MCP Server]
+        MCP -->|search results| CO
+        CO -->|Copilot LLM + RAI filters| R5[Response to user]
+    end
+```
+
+```mermaid
+flowchart LR
+    subgraph "#8 — Custom Engine Agent"
+        U8[User query] --> BOT[Your Agent Code]
+        BOT -->|searches| AIS[AI Search]
+        AIS -->|results| BOT
+        BOT -->|YOUR LLM + YOUR prompt| R8[Response to user]
+    end
+```
+
+**#5**: You control the **search**, but **Copilot's orchestrator** generates the final answer using its own LLM and mandatory RAI filters.  
+**#8**: You control **everything** — search, prompt, LLM call, response format, and content filtering.
+
+### Comparison Table
+
+| Aspect | #5 (Declarative Agent + MCP) | #8 (Custom Engine Agent) |
+|---|---|---|
+| **Search quality** | Identical (same AI Search, same hybrid search + query rewriting) | Identical |
+| **Who generates the answer** | M365 Copilot orchestrator (its LLM, its prompt) | Your code (your LLM call, your system prompt) |
+| **Content filtering** | Copilot's mandatory RAI filters — can block enterprise docs | Azure OpenAI content filters only — configurable |
+| **Indirect prompt injection filter** | Mandatory, non-configurable — blocks content resembling instructions | Not enforced by Bot Framework — you decide |
+| **Control over response format** | Limited — Copilot formats the answer | Full — Markdown, Adaptive Cards, images |
+| **Citation handling** | Copilot may rephrase or drop citations | You format citations exactly as you want |
+| **Multi-turn conversation** | Copilot manages context, your API is stateless | You manage conversation history with full control |
+| **Streaming** | Not supported via API plugin | Supported (typing indicators) |
+| **Multilingual handling** | Copilot may translate/rephrase in unexpected ways | You control language behavior in your prompt |
+| **Latency** | Extra hop: Copilot → APIM → MCP → Copilot generates answer | Direct: Bot → APIM → AI Search → your LLM → response |
+| **Reusability** | MCP server also serves #6 (Copilot Studio) for free | Agent code is standalone |
+| **M365 Copilot integration** | Native via API plugin | Native via `copilotAgents.customEngineAgents` (both appear in M365 Copilot) |
+
+### Content Filtering in M365 Copilot — The Practical Impact
+
+| Scenario | #5 Behavior | #8 Behavior |
+|---|---|---|
+| Czech doc with table data | May trigger indirect attack filter → **blocked** | Passes through — your Azure OpenAI filters are configurable |
+| Doc containing "you must follow these steps" | Copilot may flag as prompt injection → **blocked or modified** | Your agent returns it as-is |
+| Answer with exact quotes from docs | Copilot may rephrase to avoid "copying" | You control quoting behavior in your prompt |
+| Long technical answer with 10+ citations | Copilot may truncate or summarize | You decide the length and detail level |
+
+### Verdict
+
+**#8 is the winner for enterprise document search** where:
+- Content contains structured data, tables, or instruction-like text
+- Non-English content (Czech, German, etc.) triggers false positives
+- Exact citations and formatting matter
+- You need full control over the user experience
+
+**#5 is still valuable** because:
+- $0 M365 cost for all users (same as #8)
+- Shares MCP server with #6 (Copilot Studio) at no extra cost
+- Simpler to maintain (stateless API, no conversation management)
+
+**Best strategy**: Deploy **both**. Use #5 for general document search (where Copilot's filters are acceptable) and #8 for scenarios where content filtering is a problem or rich formatting is needed. Cost: ~$860/month for both (shared infrastructure).
+
+---
+
 ## Decision Framework
 
 ### When to use which agent
