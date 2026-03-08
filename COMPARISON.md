@@ -150,17 +150,19 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    U[User] -->|Teams / Custom UI| BOT[Custom Engine Agent<br/>Azure App Service]
-    BOT -->|Direct API| AIS[(Azure AI Search)]
+    U[User] -->|M365 Copilot / Teams| BOT[Custom Engine Agent<br/>Container App]
+    BOT -->|OBO Token| APIM[Azure APIM]
+    APIM -->|IP filter + JWT| AIS[(Azure AI Search)]
     BOT -->|LLM| AOAI[Azure OpenAI]
     BOT -->|Bot Framework| BF[Azure Bot Service]
     style BOT fill:#005a9e,color:#fff
+    style APIM fill:#ff8c00,color:#fff
     style AIS fill:#e81123,color:#fff
     style AOAI fill:#68217a,color:#fff
     style BF fill:#0078d4,color:#fff
 ```
 
-**How it works:** Full-code agent built with M365 Agents SDK (TypeScript or C#). Deployed to Azure App Service or Container App. Direct integration with Azure AI Search and Azure OpenAI. Total control over every aspect: search, prompts, response formatting, conversation flow. Surfaces in Teams via Bot Framework.
+**How it works:** Full-code agent built with M365 Agents SDK (TypeScript). Deployed to Container App in the same VNet as MCP server. Calls AI Search **through APIM** (same enterprise security pattern as #5/#6 — IP filtering, JWT validation). Supports SSO + OBO for per-user RBAC on AI Search indexes. Surfaces in both Teams AND M365 Copilot via `copilotAgents.customEngineAgents` manifest (v1.22+). Total control over search, prompts, response formatting, conversation flow.
 
 ---
 
@@ -320,24 +322,19 @@ flowchart LR
 | 2 | Copilot Studio (SPO) | ~$1,600 | $0 | $0 | **~$1,600** | **~$19,200** |
 | 3 | CS + Dataverse OOTB | ~$400 | $0 | ~$1,850 | **~$2,250** | **~$27,000** |
 | 4 | CS + Dataverse Kit | ~$400 | $0 | ~$1,850 | **~$2,250** | **~$27,000** |
-| 5 | Declarative Agent + AI Search | $0 | ~$865 | $0 | **~$865** | **~$10,380** |
-| 6 | CS + MCP → AI Search | ~$1,000 | ~$865 | $0 | **~$1,865** | **~$22,380** |
-| 7 | Foundry Agent | $0 | ~$240 | $0 | **~$240** | **~$2,880** |
-| 8 | M365 Agents SDK | $0 | ~$395 | $0 | **~$395** | **~$4,740** |
+| 5 | Declarative Agent + AI Search | $0 | ~$710 | $0 | **~$710** | **~$8,520** |
+| 6 | CS + MCP → AI Search | ~$1,000 | $0 (shared with #5) | $0 | **~$1,000** | **~$12,000** |
+| 7 | Foundry Agent | $0 | ~$150 | $0 | **~$150** | **~$1,800** |
+| 8 | M365 Agents SDK | $0 | ~$150 (shared infra with #5) | $0 | **~$150** | **~$1,800** |
 
 > **Important notes:**  
 > - The 250 M365 Copilot licensed users ($7,500/month) are a **sunk cost** — already paid regardless of which agent is deployed. Not included in the table above.  
-> - **#5 (Declarative Agent + AI Search) has $0 M365 cost for all 1,000 users** — declarative agents are free for all M365 users (no Copilot license required). The API plugin calls the MCP server directly — no tenant graph grounding, no Copilot Credits consumed.  
-> - Agents #7 and #8 bypass M365 Copilot entirely (API/Bot Framework access), so no Copilot Credits needed for any user.  
-> - Agents #1 and #2 both use **tenant graph grounding** (10 credits/query) for SPO search — same cost.  
-> - **Dataverse storage is the hidden cost killer** for #3 and #4 — Dataverse search indexes are billed at ~$40/GB (database rate), not $2.50/GB (file rate). For 100 GB of docs, indexes can cost $1,200–2,000/month alone.  
-> - Agent #6 (Copilot Studio + MCP) costs ~$1,000/month in Copilot Credits for non-licensed users, while #5 (Declarative Agent) serves all 1,000 users at $0 M365 cost.
-
----
-
-## Scoring Matrix
-
-> Scale: 1 (worst) → 5 (best) for each dimension
+> - **#5 (Declarative Agent + AI Search) has $0 M365 cost for all 1,000 users** — declarative agents are free for all M365 users (no Copilot license required). The API plugin calls the MCP server directly — no tenant graph grounding, no Copilot Credits consumed.
+> - **#5, #6, #8 share Azure infrastructure** — AI Search ($245), APIM ($150), VNet/NAT GW ($70), OpenAI ($50–90), Key Vault ($5), Semantic ranker ($19) = ~$540–580 shared base. Each agent type adds ~$150 for its Container App.  
+> - **If you deploy #5 first**, adding #6 is free (reuses same MCP server) and #8 costs only ~$150 more (additional Container App).  
+> - Agents #7 and #8 bypass M365 Copilot Copilot Credits entirely (API/Bot Framework access).  
+> - **Dataverse is the cost killer** for #3/#4 — search indexes at ~$40/GB make 100 GB of docs cost ~$1,450–2,250/month.  
+> - Agent #7 (Foundry) shown at incremental cost only; shared infra would be similar if using same AI Search.
 
 | # | Agent | Setup Effort | Maintenance | Output Quality | Ingestion Flexibility | Cost Efficiency | **Total /25** |
 |---|-------|:----------:|:-----------:|:-------------:|:--------------------:|:--------------:|:--------:|
@@ -397,16 +394,16 @@ flowchart TD
 
 | Insight | Details |
 |---------|---------|
-| **Cheapest overall** | Foundry Agent (#7) at ~$240/month — no M365 licensing, no Copilot Credits, moderate quality |
-| **Cheapest for Copilot users** | Declarative Agent + AI Search (#5) at ~$865/month — $0 M365 cost (free for all 1,000 users, no graph grounding), excellent quality |
+| **Cheapest overall** | Foundry Agent (#7) or M365 Agents SDK (#8) at ~$150/month incremental — when sharing Azure infra with #5 |
+| **Cheapest for all 1,000 users** | Declarative Agent + AI Search (#5) at ~$710/month — $0 M365 cost (free for all users), excellent quality |
 | **Best search quality** | AI Search-backed agents (#5, #6, #8) — hybrid search + semantic reranking + query rewriting |
-| **Best balance** | Foundry Agent (#7) — ~$240/month, good quality, built-in evaluation and monitoring, no Copilot Credits needed |
-| **Hidden cost of "free" agents** | Both Agent Builder (#1) AND Copilot Studio SPO (#2) cost ~$1,600/month each in Copilot Credits — SPO uses tenant graph grounding by default (10 credits/query) |
-| **#5 vs #6 — same backend, different cost** | Same MCP server + AI Search infra, but #6 (Copilot Studio) adds ~$1,000/month in Copilot Credits for non-licensed users. #5 (Declarative Agent) is free for all users → ~$865 vs ~$1,865 total |
-| **Bypass Copilot Credits entirely** | Foundry Agent (#7) and M365 Agents SDK (#8) are accessed via API/Bot Framework — no per-user M365 licensing needed |
-| **Copilot license = zero marginal cost** | For the 250 Copilot-licensed users, ALL M365-based agents (#1–6) are completely free — zero credits consumed |
-| **Dataverse = cheaper credits but EXPENSIVE storage** | Dataverse search avoids graph grounding (2 credits vs 12), but Dataverse search indexes at ~$40/GB make 100 GB of docs cost ~$1,450–2,250/month in storage alone |
-| **Content filtering is a deal-breaker for some** | Copilot Studio's mandatory indirect prompt injection filter blocks legitimate enterprise doc content (especially non-English, tables, structured data). AI Search-backed agents (#5, #7, #8) give full control over content filters |
+| **Best strategy** | Deploy #5 first (~$710/month), then add #6 ($0 extra, shared MCP server) and #8 (~$150 extra) — three agents for ~$860/month |
+| **Hidden cost of "free" agents** | Agent Builder (#1) and Copilot Studio SPO (#2) cost ~$1,600/month each in Copilot Credits — tenant graph grounding = 10 credits/query |
+| **#5, #6, #8 share infrastructure** | AI Search, APIM, VNet, NAT GW, OpenAI are shared. Adding another agent type costs only ~$150 (Container App) |
+| **Bypass Copilot Credits entirely** | Agents #5, #7, #8 serve all 1,000 users with $0 Copilot Credits |
+| **Copilot license = zero marginal cost** | For the 250 Copilot-licensed users, ALL M365-based agents (#1–6) are free — zero credits consumed |
+| **Dataverse is the cost killer** | Dataverse search indexes at ~$40/GB make 100 GB of docs cost ~$1,450–2,250/month in storage alone |
+| **Content filtering** | Copilot Studio's mandatory indirect prompt injection filter blocks legitimate enterprise docs. AI Search agents (#5, #7, #8) give full control |
 
 ---
 
@@ -415,18 +412,19 @@ flowchart TD
 | Item | Price | Source |
 |------|-------|--------|
 | M365 Copilot license | $30/user/month | [Microsoft 365 pricing](https://www.microsoft.com/en-us/microsoft-365/copilot) |
-| Azure AI Search S1 | ~$250/month | [AI Search pricing](https://azure.microsoft.com/en-us/pricing/details/search/) |
-| Azure AI Search Basic | ~$75/month | Same |
+| Azure AI Search S1 (1 SU) | ~$245/month | [AI Search pricing](https://azure.microsoft.com/en-us/pricing/details/search/) |
+| Azure AI Search Basic (1 SU) | ~$74/month | Same |
+| AI Search Semantic ranker | First 1,000 free, then $1/1,000 requests | Same |
 | Azure OpenAI (text-embedding-3-large) | $0.00013/1K tokens | [Azure OpenAI pricing](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/) |
 | Azure OpenAI (GPT-4o-mini) | $0.15/1M input tokens | Same |
-| Azure Container Apps (Consumption) | ~$50–100/month (moderate traffic) | [Container Apps pricing](https://azure.microsoft.com/en-us/pricing/details/container-apps/) |
-| Azure Container Apps (Dedicated workload profile) | ~$150/month (enterprise) | Same |
-| Azure App Service S1 | ~$75/month | [App Service pricing](https://azure.microsoft.com/en-us/pricing/details/app-service/) |
-| APIM Standard v2 (dedicated outbound IP) | ~$350/month | [APIM pricing](https://azure.microsoft.com/en-us/pricing/details/api-management/) |
-| APIM Consumption (no dedicated IP) | ~$3.50/million calls | Same |
+| Azure Container Apps (Dedicated workload profile) | ~$150/month (enterprise) | [Container Apps pricing](https://azure.microsoft.com/en-us/pricing/details/container-apps/) |
+| APIM Basic v2 (dedicated outbound IP, no VNet) | ~$150/month, 10M requests included | [APIM pricing](https://azure.microsoft.com/en-us/pricing/details/api-management/) |
+| APIM Standard v2 (VNet integration) | ~$700/month, 50M requests included | Same |
+| APIM Consumption (classic, no dedicated IP) | ~$3.50/million calls | Same |
 | NAT Gateway | ~$32/month + data processing ~$0.045/GB | [NAT Gateway pricing](https://azure.microsoft.com/en-us/pricing/details/azure-nat-gateway/) |
-| VNet integration (App Service) | ~$30/month | [App Service VNet pricing](https://azure.microsoft.com/en-us/pricing/details/app-service/) |
-| Dataverse storage | ~$40/GB/month (database) | [Power Platform pricing](https://www.microsoft.com/en-us/power-platform/products/power-apps/pricing) |
-| Copilot Studio messages | Included with M365 Copilot (baseline quota) | [Copilot Studio licensing](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-licensing) |
+| Dataverse storage (database) | ~$40/GB/month | [Power Platform pricing](https://www.microsoft.com/en-us/power-platform/products/power-apps/pricing) |
+| Dataverse storage (file) | ~$2.50/GB/month | Same |
+| Copilot Credits pack | ~$200/25K credits | [Copilot Studio licensing](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-licensing) |
+| Azure Bot Service F0 | Free | [Bot Service pricing](https://azure.microsoft.com/en-us/pricing/details/bot-services/) |
 
 > ⚠️ **Prices are estimates as of March 2026.** Always verify with the [Azure Pricing Calculator](https://azure.microsoft.com/en-us/pricing/calculator/) before making decisions.
