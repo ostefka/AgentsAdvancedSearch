@@ -296,7 +296,7 @@ flowchart LR
 | 5 | Declarative Agent + AI Search | S1: ~$245 | ~$50–90 (embeddings + rewriting + answers) | Container App: ~$150 | VNet + NAT GW: ~$70 | APIM Basic v2: ~$150, KV: ~$5, Semantic ranker: ~$19 | **~$690–730** |
 | 6 | CS + MCP → AI Search | S1: ~$245 (shared w/ #5) | ~$50–90 (shared) | Container App: ~$150 (shared w/ #5) | VNet + NAT GW: ~$70 (shared) | APIM: ~$150 (shared), KV: ~$5, Semantic: ~$19 | **~$690–730** (shared w/ #5) |
 | 7 | Foundry Agent | S1: ~$245 | ~$50–100 (GPT-4o + embeddings) | Foundry hosting: included | — | Semantic ranker: ~$19 | **~$315–365** ⚠️ not enterprise-grade |
-| 8 | M365 Agents SDK | S1: ~$245 (shared w/ #5) | ~$50–90 (shared) | Container App: ~$150 | VNet + NAT GW: ~$70 (shared) | APIM: ~$150 (shared), Bot Service: free, Semantic: ~$19 | **~$840–880** (or ~$150 incremental if #5 deployed) |
+| 8 | M365 Agents SDK | S1: ~$245 (shared w/ #5) | ~$50–90 (shared) | Container App: ~$150 | VNet + NAT GW: ~$70 (shared) | APIM: ~$150 (shared), Bot Service: free, Semantic: ~$19 | **~$840–880** |
 
 ### Dataverse / Power Platform Costs (100 GB of enterprise documents)
 
