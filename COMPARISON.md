@@ -231,14 +231,14 @@ flowchart LR
 
 | # | Agent | Supported Sources | Chunking Control | Metadata Enrichment | Update Frequency |
 |---|-------|------------------|-----------------|--------------------|-----------------  |
-| 1 | Agent Builder (SPO) | SPO sites, libraries, pages | None (M365 index) | None | Automatic (M365 crawl) |
-| 2 | Copilot Studio (SPO) | SPO sites, libraries | None | None | Automatic (SPO connector) |
+| 1 | Agent Builder (SPO) | SPO sites, libraries, pages | None (M365 index) | None | Automatic (M365 Work IQ crawl) |
+| 2 | Copilot Studio (SPO) | SPO sites, libraries, pages | None (M365 index, same as #1) | None | Automatic (M365 Work IQ crawl) |
 | 3 | CS + Dataverse OOTB | SPO → Dataverse | Minimal (OOTB) | Basic (article schema) | Scheduled sync |
 | 4 | CS + Dataverse Kit | SPO (via Kit sync), supports more file types, up to 512 MB | Automatic (Dataverse search indexes file content) | Automatic (file-level metadata from SPO) | Daily sync (or on-demand) |
 | 5 | Declarative Agent + AI Search | Any (Doc Intelligence, custom indexers, push API) | Full control (chunk size, overlap, strategy) | Full control (custom fields, facets, scoring profiles) | Custom (indexer schedule or push) |
-| 6 | CS + MCP → AI Search | Same as #5 | Same as #5 | Same as #5 | Same as #5 |
-| 7 | Foundry Agent | Files (upload or blob), AI Search index, custom data | Configurable (Foundry file search or custom) | Moderate | On upload or indexer |
-| 8 | M365 Agents SDK | Any (same flexibility as #5) | Full control | Full control | Custom |
+| 6 | CS + MCP → AI Search | Same as #5 (shared AI Search index + ingestion pipeline) | Same as #5 | Same as #5 | Same as #5 |
+| 7 | Foundry Agent | SPO (via Foundry IQ connector), files (upload), AI Search index | Configurable (Foundry IQ manages chunking) | Moderate | On upload or indexer |
+| 8 | M365 Agents SDK | Same as #5 (shared AI Search index + ingestion pipeline) | Same as #5 | Same as #5 | Same as #5 |
 
 ---
 
