@@ -203,9 +203,9 @@ flowchart LR
 | # | Agent | Search Method | Semantic Understanding | Answer Quality | Citation Quality |
 |---|-------|--------------|----------------------|---------------|-----------------|
 | 1 | Agent Builder (SPO) | M365 Index (keyword + semantic) | Good (M365 built-in) | ⭐⭐⭐ Good | ⭐⭐⭐ Links to SPO |
-| 2 | Copilot Studio (SPO) | SPO connector (keyword) | Basic | ⭐⭐ Acceptable | ⭐⭐ Links to SPO |
-| 3 | CS + Dataverse OOTB | Dataverse search | Basic-to-Good | ⭐⭐ Acceptable | ⭐⭐ Dataverse refs |
-| 4 | CS + Dataverse Kit | Dataverse search over synced files | Good (full file content indexed, incl. PDF non-text) | ⭐⭐⭐ Good | ⭐⭐⭐ File refs |
+| 2 | Copilot Studio (SPO) | M365 semantic index (tenant graph grounding) | Good (M365 built-in, same as #1) | ⭐⭐⭐ Good | ⭐⭐⭐ Links to SPO |
+| 3 | CS + Dataverse OOTB | Dataverse search (relevance + semantic) | Good (Dataverse semantic indexes) | ⭐⭐⭐ Good | ⭐⭐ Dataverse refs |
+| 4 | CS + Dataverse Kit | Dataverse search over synced files | Good (full file content indexed, incl. PDF non-text, larger files) | ⭐⭐⭐ Good | ⭐⭐⭐ File refs |
 | 5 | Declarative Agent + AI Search | Hybrid (BM25 + vector + semantic reranking) + query rewriting | Excellent | ⭐⭐⭐⭐⭐ Excellent | ⭐⭐⭐⭐ Rich metadata |
 | 6 | CS + MCP → AI Search | Hybrid + query rewriting (same engine as #5) | Excellent | ⭐⭐⭐⭐⭐ Excellent | ⭐⭐⭐⭐ Rich metadata |
 | 7 | Foundry Agent | AI Search (configurable) + optional vector store | Very Good | ⭐⭐⭐⭐ Very Good | ⭐⭐⭐ Configurable |
@@ -345,8 +345,8 @@ flowchart LR
 | # | Agent | Setup Effort | Maintenance | Output Quality | Ingestion Flexibility | Cost Efficiency | **Total /25** |
 |---|-------|:----------:|:-----------:|:-------------:|:--------------------:|:--------------:|:--------:|
 | 1 | Agent Builder (SPO) | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐ 3 | ⭐ 1 | ⭐⭐⭐ 3 | **17** |
-| 2 | Copilot Studio (SPO) | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐ 2 | ⭐ 1 | ⭐⭐⭐ 3 | **16** |
-| 3 | CS + Dataverse OOTB | ⭐⭐⭐⭐ 4 | ⭐⭐⭐⭐ 4 | ⭐⭐ 2 | ⭐⭐ 2 | ⭐⭐ 2 | **14** |
+| 2 | Copilot Studio (SPO) | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐ 3 | ⭐ 1 | ⭐⭐⭐ 3 | **17** |
+| 3 | CS + Dataverse OOTB | ⭐⭐⭐⭐ 4 | ⭐⭐⭐⭐ 4 | ⭐⭐⭐ 3 | ⭐⭐ 2 | ⭐⭐ 2 | **15** |
 | 4 | CS + Dataverse Kit | ⭐⭐⭐ 3 | ⭐⭐⭐ 3 | ⭐⭐⭐ 3 | ⭐⭐ 2 | ⭐⭐ 2 | **13** |
 | 5 | Declarative Agent + AI Search | ⭐⭐ 2 | ⭐⭐ 2 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐ 4 | **18** |
 | 6 | CS + MCP → AI Search | ⭐⭐ 2 | ⭐⭐ 2 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐⭐⭐⭐ 5 | ⭐⭐ 2 | **16** |
@@ -365,7 +365,7 @@ xychart-beta
   x-axis ["AB SPO", "CS SPO", "CS DV OOTB", "CS DV Kit", "DA+AIS", "CS+MCP", "Foundry", "SDK"]
   y-axis "Score (1-5)" 1 --> 5
   bar [3, 3, 2, 2, 4, 2, 3, 3]
-  line [3, 2, 2, 3, 5, 5, 4, 5]
+  line [3, 3, 3, 3, 5, 5, 4, 5]
 ```
 
 > **Bar** = Cost Efficiency · **Line** = Output Quality  
