@@ -1,0 +1,61 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.22/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.22",
+  "id": "618322ad-4119-4fe4-bd31-4ab4a81d7e98",
+  "version": "1.0.0",
+  "developer": {
+    "name": "Enterprise AI Search",
+    "websiteUrl": "https://github.com/ostefka/AgentsAdvancedSearch",
+    "privacyUrl": "https://github.com/ostefka/AgentsAdvancedSearch",
+    "termsOfUseUrl": "https://github.com/ostefka/AgentsAdvancedSearch"
+  },
+  "name": {
+    "short": "AI Search Agent",
+    "full": "Enterprise Document Search Agent with Azure AI Search"
+  },
+  "description": {
+    "short": "Search enterprise documents with AI-powered hybrid search",
+    "full": "Custom engine agent that searches enterprise documents using Azure AI Search with hybrid search (BM25 + vector + semantic reranking) and AI-powered query rewriting. Provides answers with citations from organizational policies, guidelines, and project documentation."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#0078D4",
+  "bots": [
+    {
+      "botId": "618322ad-4119-4fe4-bd31-4ab4a81d7e98",
+      "scopes": ["personal", "team", "groupChat"],
+      "supportsFiles": false,
+      "isNotificationOnly": false,
+      "commandLists": [
+        {
+          "scopes": ["personal"],
+          "commands": [
+            {
+              "title": "Search documents",
+              "description": "Search across all enterprise documents"
+            },
+            {
+              "title": "Find policies about remote work",
+              "description": "Search for specific policy topics"
+            },
+            {
+              "title": "Compare project milestones",
+              "description": "Complex cross-document questions with query rewriting"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "copilotAgents": {
+    "customEngineAgents": [
+      {
+        "id": "618322ad-4119-4fe4-bd31-4ab4a81d7e98",
+        "type": "bot"
+      }
+    ]
+  },
+  "validDomains": []
+}

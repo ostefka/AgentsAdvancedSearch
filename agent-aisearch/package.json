@@ -1,0 +1,22 @@
+{
+  "name": "agent-aisearch",
+  "version": "1.0.0",
+  "description": "M365 Custom Engine Agent with Azure AI Search - hybrid search, query rewriting, M365 Copilot publishing",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js"
+  },
+  "dependencies": {
+    "@azure/identity": "^4.6.0",
+    "@azure/search-documents": "^12.1.0",
+    "botbuilder": "^4.23.1",
+    "express": "^4.21.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}
