@@ -14,9 +14,32 @@ export declare class SearchService {
      */
     private getSearchClient;
     private getEmbedding;
-    rewriteQuery(query: string): Promise<string[]>;
+    private callOpenAI;
+    /**
+     * History-aware query rewriting with spelling correction and synonym expansion.
+     * Uses conversation history to understand follow-up questions.
+     */
+    rewriteQuery(query: string, conversationHistory?: Array<{
+        role: string;
+        content: string;
+    }>): Promise<string[]>;
     search(query: string, options?: SearchOptions, userToken?: string): Promise<SearchResultWithCitation[]>;
-    smartSearch(query: string, options?: SearchOptions, userToken?: string): Promise<SearchResultWithCitation[]>;
-    generateAnswer(query: string, context: SearchResultWithCitation[]): Promise<string>;
+    /**
+     * Advanced smart search: history-aware query rewriting, parallel execution,
+     * iterative refinement if results are poor, weighted scoring.
+     */
+    smartSearch(query: string, options?: SearchOptions, userToken?: string, conversationHistory?: Array<{
+        role: string;
+        content: string;
+    }>): Promise<SearchResultWithCitation[]>;
+    /**
+     * Compute a composite score that weighs semantic reranker score higher
+     * than base BM25/vector score for better ranking.
+     */
+    private computeCompositeScore;
+    generateAnswer(query: string, context: SearchResultWithCitation[], conversationHistory?: Array<{
+        role: string;
+        content: string;
+    }>): Promise<string>;
 }
 //# sourceMappingURL=search-service.d.ts.map

@@ -47,16 +47,16 @@ app.on("message", async (ctx) => {
     // Step 2: Show typing indicator
     await send({ type: "typing" });
     try {
-        // Step 3: Smart search with user's OBO token
-        const results = await searchService.smartSearch(query, { top: 5 }, userToken);
+        // Step 3: Smart search with user's OBO token + conversation history
+        const results = await searchService.smartSearch(query, { top: 5 }, userToken, history);
         if (results.length === 0) {
             await send("No relevant documents found. Try rephrasing your query or using different keywords.");
             history.push({ role: "user", content: query });
             history.push({ role: "assistant", content: "No results found." });
             return;
         }
-        // Step 4: Generate RAG answer
-        const answer = await searchService.generateAnswer(query, results);
+        // Step 4: Generate RAG answer with conversation context
+        const answer = await searchService.generateAnswer(query, results, history);
         // Step 5: Send rich Adaptive Card with results
         const card = (0, cards_1.buildSearchResultsCard)(query, answer, results);
         try {

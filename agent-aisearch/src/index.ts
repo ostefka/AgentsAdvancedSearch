@@ -58,8 +58,8 @@ app.on("message", async (ctx: any) => {
   await send({ type: "typing" });
 
   try {
-    // Step 3: Smart search with user's OBO token
-    const results = await searchService.smartSearch(query, { top: 5 }, userToken);
+    // Step 3: Smart search with user's OBO token + conversation history
+    const results = await searchService.smartSearch(query, { top: 5 }, userToken, history);
 
     if (results.length === 0) {
       await send(
@@ -70,8 +70,8 @@ app.on("message", async (ctx: any) => {
       return;
     }
 
-    // Step 4: Generate RAG answer
-    const answer = await searchService.generateAnswer(query, results);
+    // Step 4: Generate RAG answer with conversation context
+    const answer = await searchService.generateAnswer(query, results, history);
 
     // Step 5: Send rich Adaptive Card with results
     const card = buildSearchResultsCard(query, answer, results);
