@@ -59,7 +59,13 @@ M365 Copilot / Teams
 - Sideloaded to tenant manually
 - **Tested successfully in M365 Copilot** — agent receives Czech queries, runs hybrid search + query rewriting, returns RAG answers with citations
 
-## Issues Resolved During Deployment
+## Phase 2: Teams SDK v2 + SSO + OBO + Adaptive Cards
+
+### Framework Migration
+- **From:** `botbuilder` (raw Bot Framework SDK)
+- **To:** `@microsoft/teams.apps` + `@microsoft/teams.ai` + `@microsoft/teams.cards` (Teams SDK v2)
+
+### Progress
 1. **Bot auth config** — `ConfigurationBotFrameworkAuthentication` needs `ConfigurationServiceClientCredentialFactory` as 2nd arg, not config in 1st arg
 2. **Missing service principal** — `az ad sp create` needed for the bot app registration (AADSTS7000229)
 3. **Missing managed identity** — Container App needed user-assigned MI for AI Search/OpenAI access

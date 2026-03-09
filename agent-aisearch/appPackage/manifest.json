@@ -57,5 +57,12 @@
       }
     ]
   },
-  "validDomains": []
+  "webApplicationInfo": {
+    "id": "618322ad-4119-4fe4-bd31-4ab4a81d7e98",
+    "resource": "api://botid-618322ad-4119-4fe4-bd31-4ab4a81d7e98"
+  },
+  "validDomains": [
+    "token.botframework.com",
+    "agent-aisearch-app.redsand-292853fe.swedencentral.azurecontainerapps.io"
+  ]
 }

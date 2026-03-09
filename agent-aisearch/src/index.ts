@@ -1,50 +1,118 @@
-import express from "express";
-import {
-  CloudAdapter,
-  ConfigurationBotFrameworkAuthentication,
-  ConfigurationServiceClientCredentialFactory,
-} from "botbuilder";
-import { SearchAgentBot } from "./bot";
+import { App } from "@microsoft/teams.apps";
+import { SearchService } from "./search-service";
+import { buildSearchResultsCard, buildTextResponse } from "./cards";
 
-const app = express();
-app.use(express.json());
+const CONNECTION_NAME = process.env.OAUTH_CONNECTION_NAME || "AISearchSSO";
 
-// Bot Framework auth configuration for SingleTenant
-const credentialFactory = new ConfigurationServiceClientCredentialFactory({
-  MicrosoftAppId: process.env.BOT_ID || "",
-  MicrosoftAppPassword: process.env.BOT_PASSWORD || "",
-  MicrosoftAppType: "SingleTenant",
-  MicrosoftAppTenantId: process.env.BOT_TENANT_ID || "",
+const app = new App({
+  clientId: process.env.CLIENT_ID,
+  clientSecret: process.env.CLIENT_SECRET,
+  tenantId: process.env.TENANT_ID,
+  oauth: {
+    defaultConnectionName: CONNECTION_NAME,
+  },
 });
 
-const botFrameworkAuth = new ConfigurationBotFrameworkAuthentication(
-  {},
-  credentialFactory
-);
+const searchService = new SearchService();
 
-const adapter = new CloudAdapter(botFrameworkAuth);
+// Conversation history per conversation (session memory)
+const conversationHistory = new Map<string, Array<{ role: string; content: string }>>();
 
-// Error handler
-adapter.onTurnError = async (context, error) => {
-  console.error(`[onTurnError] ${error.message}`, error);
-  await context.sendActivity("Sorry, an error occurred. Please try again.");
-};
+function getHistory(conversationId: string) {
+  if (!conversationHistory.has(conversationId)) {
+    conversationHistory.set(conversationId, []);
+  }
+  return conversationHistory.get(conversationId)!;
+}
 
-const bot = new SearchAgentBot();
-
-// Bot messages endpoint
-app.post("/api/messages", async (req, res) => {
-  await adapter.process(req, res, (context) => bot.run(context));
+// Welcome message
+app.on("install.add" as any, async ({ send }: any) => {
+  await send(
+    "👋 Hello! I'm the **Enterprise Document Search Agent**.\n\n" +
+    "Ask me anything about your organization's documents — policies, guidelines, project documentation, and more.\n\n" +
+    "I use advanced hybrid search with semantic reranking and AI-powered query rewriting for the best results.\n\n" +
+    "🔐 Your search results are personalized — you'll only see documents you have access to."
+  );
 });
 
-// Health check
-app.get("/health", (_req, res) => {
-  res.json({ status: "ok", agent: "agent-aisearch", timestamp: new Date().toISOString() });
+// Main message handler
+app.on("message", async (ctx: any) => {
+  const { send, activity, signin } = ctx;
+  const query = activity.text?.trim();
+  if (!query) {
+    await send("Please enter a search query.");
+    return;
+  }
+
+  const conversationId = activity.conversation?.id || "default";
+  const history = getHistory(conversationId);
+
+  // Step 1: Ensure user is signed in (SSO)
+  const userToken = await signin();
+  if (!userToken) {
+    // SSO flow initiated — wait for signin event
+    return;
+  }
+
+  // Step 2: Show typing indicator
+  await send({ type: "typing" });
+
+  try {
+    // Step 3: Smart search with user's OBO token
+    const results = await searchService.smartSearch(query, { top: 5 }, userToken);
+
+    if (results.length === 0) {
+      await send(
+        "No relevant documents found. Try rephrasing your query or using different keywords."
+      );
+      history.push({ role: "user", content: query });
+      history.push({ role: "assistant", content: "No results found." });
+      return;
+    }
+
+    // Step 4: Generate RAG answer
+    const answer = await searchService.generateAnswer(query, results);
+
+    // Step 5: Send rich Adaptive Card with results
+    const card = buildSearchResultsCard(query, answer, results);
+    try {
+      await send({
+        type: "message",
+        attachments: [
+          {
+            contentType: "application/vnd.microsoft.card.adaptive",
+            content: card,
+          },
+        ],
+      });
+    } catch {
+      // Fallback to text if Adaptive Card fails (e.g., some Copilot scenarios)
+      await send(buildTextResponse(answer, results));
+    }
+
+    // Update conversation history
+    history.push({ role: "user", content: query });
+    history.push({ role: "assistant", content: answer });
+
+    // Trim history to last 10 exchanges
+    if (history.length > 20) {
+      history.splice(0, history.length - 20);
+    }
+  } catch (error: any) {
+    console.error("Search error:", error);
+    await send(
+      `An error occurred while searching: ${error.message || "Unknown error"}. Please try again.`
+    );
+  }
 });
 
+// SSO success event
+app.on("signin" as any, async ({ send }: any) => {
+  await send("✅ Signed in successfully. Please send your question again.");
+});
+
+// Start the app
 const port = process.env.PORT || 3978;
-app.listen(port, () => {
-  console.log(`Agent AI Search bot listening on port ${port}`);
-  console.log(`Health: http://localhost:${port}/health`);
-  console.log(`Messages: POST http://localhost:${port}/api/messages`);
-});
+app.start(Number(port));
+console.log(`Agent AI Search v2 listening on port ${port}`);
+console.log(`OAuth connection: ${CONNECTION_NAME}`);

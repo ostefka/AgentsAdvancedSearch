@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SearchService = void 0;
 const search_documents_1 = require("@azure/search-documents");
 const identity_1 = require("@azure/identity");
+const auth_1 = require("./auth");
 class SearchService {
     endpoint;
     indexName;
@@ -24,7 +25,22 @@ class SearchService {
         }
         return new identity_1.DefaultAzureCredential();
     }
-    getSearchClient() {
+    /**
+     * Get a SearchClient authenticated with the user's OBO token (per-user RBAC)
+     * or fallback to managed identity if no user token is available.
+     */
+    async getSearchClient(userToken) {
+        if (userToken) {
+            // OBO: exchange user token for AI Search-scoped token
+            const searchToken = await (0, auth_1.exchangeForSearchToken)(userToken);
+            return new search_documents_1.SearchClient(this.endpoint, this.indexName, {
+                getToken: async () => ({
+                    token: searchToken,
+                    expiresOnTimestamp: Date.now() + 3600000,
+                }),
+            });
+        }
+        // Fallback to managed identity
         return new search_documents_1.SearchClient(this.endpoint, this.indexName, this.getCredential());
     }
     async getEmbedding(text) {
@@ -76,8 +92,8 @@ class SearchService {
         }
         return [query];
     }
-    async search(query, options) {
-        const client = this.getSearchClient();
+    async search(query, options, userToken) {
+        const client = await this.getSearchClient(userToken);
         const searchType = options?.searchType || "hybrid";
         const top = options?.top || 5;
         const filter = options?.filter;
@@ -143,13 +159,13 @@ class SearchService {
         }
         return results;
     }
-    async smartSearch(query, options) {
+    async smartSearch(query, options, userToken) {
         const queries = await this.rewriteQuery(query);
         const top = options?.top || 5;
         const filter = options?.filter;
         const allResults = new Map();
         for (const q of queries) {
-            const results = await this.search(q, { top, filter, searchType: "hybrid" });
+            const results = await this.search(q, { top, filter, searchType: "hybrid" }, userToken);
             for (const r of results) {
                 const existing = allResults.get(r.citation.id);
                 if (!existing || r.score > existing.score) {

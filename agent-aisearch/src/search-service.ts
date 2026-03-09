@@ -1,6 +1,7 @@
 import { SearchClient } from "@azure/search-documents";
 import { DefaultAzureCredential, ManagedIdentityCredential } from "@azure/identity";
 import type { SearchDocument, SearchResultWithCitation, SearchOptions, SearchType } from "./types";
+import { exchangeForSearchToken } from "./auth";
 
 export class SearchService {
   private endpoint: string;
@@ -26,7 +27,22 @@ export class SearchService {
     return new DefaultAzureCredential();
   }
 
-  private getSearchClient(): SearchClient<SearchDocument> {
+  /**
+   * Get a SearchClient authenticated with the user's OBO token (per-user RBAC)
+   * or fallback to managed identity if no user token is available.
+   */
+  private async getSearchClient(userToken?: string): Promise<SearchClient<SearchDocument>> {
+    if (userToken) {
+      // OBO: exchange user token for AI Search-scoped token
+      const searchToken = await exchangeForSearchToken(userToken);
+      return new SearchClient<SearchDocument>(this.endpoint, this.indexName, {
+        getToken: async () => ({
+          token: searchToken,
+          expiresOnTimestamp: Date.now() + 3600000,
+        }),
+      });
+    }
+    // Fallback to managed identity
     return new SearchClient<SearchDocument>(this.endpoint, this.indexName, this.getCredential());
   }
 
@@ -83,8 +99,8 @@ export class SearchService {
     return [query];
   }
 
-  async search(query: string, options?: SearchOptions): Promise<SearchResultWithCitation[]> {
-    const client = this.getSearchClient();
+  async search(query: string, options?: SearchOptions, userToken?: string): Promise<SearchResultWithCitation[]> {
+    const client = await this.getSearchClient(userToken);
     const searchType: SearchType = options?.searchType || "hybrid";
     const top = options?.top || 5;
     const filter = options?.filter;
@@ -157,14 +173,14 @@ export class SearchService {
     return results;
   }
 
-  async smartSearch(query: string, options?: SearchOptions): Promise<SearchResultWithCitation[]> {
+  async smartSearch(query: string, options?: SearchOptions, userToken?: string): Promise<SearchResultWithCitation[]> {
     const queries = await this.rewriteQuery(query);
     const top = options?.top || 5;
     const filter = options?.filter;
     const allResults = new Map<string, SearchResultWithCitation>();
 
     for (const q of queries) {
-      const results = await this.search(q, { top, filter, searchType: "hybrid" });
+      const results = await this.search(q, { top, filter, searchType: "hybrid" }, userToken);
       for (const r of results) {
         const existing = allResults.get(r.citation.id);
         if (!existing || r.score > existing.score) {
