@@ -300,16 +300,18 @@ flowchart LR
 
 ### Dataverse / Power Platform Costs (100 GB of enterprise documents)
 
-> **Dataverse storage pricing:**  
-> - File capacity: ~$2.50/GB/month (for document files)  
-> - Database capacity: ~$40/GB/month (for structured data AND search indexes)  
-> - Dataverse search indexes are billed at the **database capacity rate** — for 100 GB of docs, indexes can add 30–50+ GB of database storage  
-> - Source: [Dataverse capacity-based storage](https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage)
+> **Dataverse storage pricing (pay-as-you-go):**  
+> - File capacity: **$2.40/GB/month** (for document files) — cheapest tier  
+> - Database capacity: **$48/GB/month** (for structured data AND search indexes)  
+> - Log capacity: **$12/GB/month** (only if auditing enabled)  
+> - Dataverse search indexes (`DataverseSearch` table) are billed at the **database capacity rate** ($48/GB) — for 100 GB of docs, indexes can add 30–50+ GB of database storage  
+> - First 1 GB each of database and file per environment is free  
+> - Source: [Dataverse pay-as-you-go meters](https://learn.microsoft.com/en-us/power-platform/admin/pay-as-you-go-meters)
 
 | # | Agent | File Storage (100 GB docs) | Database (metadata + search indexes) | Power Automate | **Subtotal** |
 |---|-------|---------------------------|-------------------------------------|---------------|--------|
-| 3 | CS + Dataverse OOTB | ~$250 (100 GB × $2.50) | ~$1,200–2,000 (30–50 GB indexes × $40) | — | **~$1,450–2,250** |
-| 4 | CS + Dataverse Kit | ~$250 (100 GB × $2.50) | ~$1,200–2,000 (30–50 GB indexes × $40) | — (Kit is free, uses existing PP license) | **~$1,450–2,250** |
+| 3 | CS + Dataverse OOTB | ~$240 (100 GB × $2.40) | ~$1,440–2,400 (30–50 GB indexes × $48) | — | **~$1,680–2,640** |
+| 4 | CS + Dataverse Kit | ~$240 (100 GB × $2.40) | ~$1,440–2,400 (30–50 GB indexes × $48) | — (Kit is free, uses existing PP license) | **~$1,680–2,640** |
 
 ### Total Monthly Cost Summary
 
@@ -317,8 +319,8 @@ flowchart LR
 |---|-------|-----------------------------|--------------------------|--------------|-------------------|------------|
 | 1 | Agent Builder (SPO) | ~$1,600 | $0 | $0 | **~$1,600** | **~$19,200** |
 | 2 | Copilot Studio (SPO) | ~$1,600 | $0 | $0 | **~$1,600** | **~$19,200** |
-| 3 | CS + Dataverse OOTB | ~$400 | $0 | ~$1,850 | **~$2,250** | **~$27,000** |
-| 4 | CS + Dataverse Kit | ~$400 | $0 | ~$1,850 | **~$2,250** | **~$27,000** |
+| 3 | CS + Dataverse OOTB | ~$400 | $0 | ~$2,160 | **~$2,560** | **~$30,720** |
+| 4 | CS + Dataverse Kit | ~$400 | $0 | ~$2,160 | **~$2,560** | **~$30,720** |
 | 5 | Declarative Agent + AI Search | $0 | ~$710 | $0 | **~$710** | **~$8,520** |
 | 6 | CS + MCP → AI Search | ~$1,000 | ~$710 | $0 | **~$1,710** | **~$20,520** |
 | 7 | Foundry Agent | $0 | ~$340 ⚠️ | $0 | **~$340** ⚠️ | **~$4,080** |
@@ -497,8 +499,9 @@ flowchart TD
 | APIM Standard v2 (VNet integration) | ~$700/month, 50M requests included | Same |
 | APIM Consumption (classic, no dedicated IP) | ~$3.50/million calls | Same |
 | NAT Gateway | ~$32/month + data processing ~$0.045/GB | [NAT Gateway pricing](https://azure.microsoft.com/en-us/pricing/details/azure-nat-gateway/) |
-| Dataverse storage (database) | ~$40/GB/month | [Power Platform pricing](https://www.microsoft.com/en-us/power-platform/products/power-apps/pricing) |
-| Dataverse storage (file) | ~$2.50/GB/month | Same |
+| Dataverse storage (database) | $48/GB/month | [Dataverse pay-as-you-go meters](https://learn.microsoft.com/en-us/power-platform/admin/pay-as-you-go-meters) |
+| Dataverse storage (file) | $2.40/GB/month | Same |
+| Dataverse storage (log) | $12/GB/month | Same |
 | Copilot Credits pack | ~$200/25K credits | [Copilot Studio licensing](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-licensing) |
 | Azure Bot Service F0 | Free | [Bot Service pricing](https://azure.microsoft.com/en-us/pricing/details/bot-services/) |
 
