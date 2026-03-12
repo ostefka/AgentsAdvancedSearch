@@ -1,1 +1,13 @@
 .azure-cli/
+
+# Agent source code (has its own repo or stays local)
+agent-aisearch/
+
+# Research and progress docs (local only)
+AGENT8-PROGRESS.md
+FOUNDRY-IQ-AGENTIC-RETRIEVAL-RESEARCH.md
+FRAMEWORK-COMPARISON.md
+findings-summary.md
+
+# VS Code settings
+.vscode/
