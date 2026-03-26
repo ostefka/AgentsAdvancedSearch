@@ -1,13 +1,28 @@
 .azure-cli/
 
-# Agent source code (has its own repo or stays local)
+# All implementation code lives in private repo: ostefka/agents-framework
 agent-aisearch/
+infra/
+scripts/
+node_modules/
+
+# Documentation (private repo)
+ARCHITECTURE.md
+SSO-OBO-GUIDE.md
+AGENT-OBSERVABILITY-SPEC.md
+TODO.md
+CHANGELOG.md
 
 # Research and progress docs (local only)
 AGENT8-PROGRESS.md
 FOUNDRY-IQ-AGENTIC-RETRIEVAL-RESEARCH.md
 FRAMEWORK-COMPARISON.md
+FINALIZATION-PLAN.md
 findings-summary.md
+
+# Build artifacts
+build-log*.txt
+sideload*.js
 
 # VS Code settings
 .vscode/
