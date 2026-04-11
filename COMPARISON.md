@@ -331,7 +331,11 @@ flowchart LR
 > - **#5 and #6** use the same Azure infra (AI Search, APIM, VNet, OpenAI). If you deploy both, total Azure cost is still ~$710 (shared MCP server).  
 > - **#8** uses the same shared infra as #5/#6 + its own Container App. If #5 is already deployed, #8 adds only ~$150/month.  
 > - **Combined #5 + #6 + #8**: ~$860/month Azure total (shared infra + 2 Container Apps).  
-> - **APIM note**: The architecture requires a **static outbound IP** from APIM because the Container App has IP-based ingress filtering. APIM Classic Basic (~$147/month) provides a static IP and is sufficient for PoC and moderate workloads (~1,000 req/sec per unit, 2 units max). For production at scale, consider Classic Standard (~$687/month, ~2,500 req/sec, 4 units) or Classic Premium (~$2,795/month, VNet injection, multi-region). The v2 tiers (Basic v2, Standard v2) do **not** have a deterministic outbound IP and cannot be used in this architecture.
+> - **APIM note**: The architecture requires a **static outbound IP** from APIM because the Container App has IP-based ingress filtering. Two approaches:  
+>   - **PoC / moderate workloads**: APIM Classic Basic (~$147/month) — has a native static outbound IP, ~1,000 req/sec per unit, 2 units max.  
+>   - **Production**: APIM Standard v2 (~$700/month) with [VNet integration](https://learn.microsoft.com/en-us/azure/api-management/integrate-vnet-outbound) + NAT Gateway on the delegated subnet (~$35/month) — gives a static outbound IP via NAT GW, plus the ability to reach VNet-isolated backends directly. Scales to 10 units.  
+>   - For enterprise (multi-region, availability zones): consider Classic Standard (~$687/month), Classic Premium (~$2,795/month), or Premium v2.  
+>   - **Basic v2** does **not** support VNet integration and has no static outbound IP — not suitable for this architecture.
 >
 > **Ingestion costs** for 100 file changes/month: ~$2 (Doc Intelligence ~$1.50 + embeddings ~$0.07 + indexer runs: free with S1). **Negligible.**
 >
@@ -497,9 +501,10 @@ flowchart TD
 | Azure OpenAI (GPT-4o-mini) | $0.15/1M input tokens | Same |
 | Azure Container Apps (Dedicated workload profile) | ~$150/month (enterprise) | [Container Apps pricing](https://azure.microsoft.com/en-us/pricing/details/container-apps/) |
 | APIM Classic Basic (static outbound IP, ~1K req/sec, 2 units max — PoC/moderate) | ~$147/month | [APIM pricing](https://azure.microsoft.com/en-us/pricing/details/api-management/) |
+| APIM Standard v2 (VNet integration + NAT GW for static outbound IP, 10 units — production) | ~$700/month + NAT GW ~$35/month | Same |
 | APIM Classic Standard (static outbound IP, ~2.5K req/sec, 4 units — production) | ~$687/month | Same |
 | APIM Classic Premium (VNet injection, multi-region, zones — enterprise) | ~$2,795/month | Same |
-| APIM Basic v2 (no static IP — not suitable for IP-filtered backends) | ~$150/month | Same |
+| APIM Basic v2 (no VNet integration, no static IP — not suitable for this architecture) | ~$150/month | Same |
 | APIM Consumption (no static IP) | ~$3.50/million calls | Same |
 | NAT Gateway | ~$32/month + data processing ~$0.045/GB | [NAT Gateway pricing](https://azure.microsoft.com/en-us/pricing/details/azure-nat-gateway/) |
 | Dataverse storage (database) | $48/GB/month | [Dataverse pay-as-you-go meters](https://learn.microsoft.com/en-us/power-platform/admin/pay-as-you-go-meters) |
