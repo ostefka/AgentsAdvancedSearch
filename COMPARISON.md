@@ -293,10 +293,10 @@ flowchart LR
 | 2 | Copilot Studio (SPO) | — | — | — | — | — | **$0** |
 | 3 | CS + Dataverse OOTB | — | — | — | — | — | **$0** |
 | 4 | CS + Dataverse Kit | — | — | — | — | — | **$0** |
-| 5 | Declarative Agent + AI Search | S1: ~$245 | ~$50–90 (embeddings + rewriting + answers) | Container App: ~$150 | VNet + NAT GW: ~$70 | APIM Standard v2: ~$700 (min tier with static outbound IP), KV: ~$5, Semantic ranker: ~$19 | **~$1,240–1,280** |
-| 6 | CS + MCP → AI Search | S1: ~$245 (shared w/ #5) | ~$50–90 (shared) | Container App: ~$150 (shared w/ #5) | VNet + NAT GW: ~$70 (shared) | APIM: ~$700 (shared), KV: ~$5, Semantic: ~$19 | **~$1,240–1,280** (shared w/ #5) |
+| 5 | Declarative Agent + AI Search | S1: ~$245 | ~$50–90 (embeddings + rewriting + answers) | Container App: ~$150 | VNet + NAT GW: ~$70 | APIM Classic Basic: ~$147 (static outbound IP), KV: ~$5, Semantic ranker: ~$19 | **~$690–730** |
+| 6 | CS + MCP → AI Search | S1: ~$245 (shared w/ #5) | ~$50–90 (shared) | Container App: ~$150 (shared w/ #5) | VNet + NAT GW: ~$70 (shared) | APIM: ~$147 (shared), KV: ~$5, Semantic: ~$19 | **~$690–730** (shared w/ #5) |
 | 7 | Foundry Agent | S1: ~$245 | ~$50–100 (GPT-4o + embeddings) | Foundry hosting: included | — | Semantic ranker: ~$19 | **~$315–365** ⚠️ see notes |
-| 8 | M365 Agents SDK | S1: ~$245 (shared w/ #5) | ~$50–90 (shared) | Container App: ~$150 | VNet + NAT GW: ~$70 (shared) | APIM: ~$700 (shared), Bot Service: free, Semantic: ~$19 | **~$1,240–1,280** |
+| 8 | M365 Agents SDK | S1: ~$245 (shared w/ #5) | ~$50–90 (shared) | Container App: ~$150 | VNet + NAT GW: ~$70 (shared) | APIM: ~$147 (shared), Bot Service: free, Semantic: ~$19 | **~$690–730** |
 
 ### Dataverse / Power Platform Costs (100 GB of enterprise documents)
 
@@ -321,23 +321,23 @@ flowchart LR
 | 2 | Copilot Studio (SPO) | ~$1,600 | $0 | $0 | **~$1,600** | **~$19,200** |
 | 3 | CS + Dataverse OOTB | ~$400 | $0 | ~$2,160 | **~$2,560** | **~$30,720** |
 | 4 | CS + Dataverse Kit | ~$400 | $0 | ~$2,160 | **~$2,560** | **~$30,720** |
-| 5 | Declarative Agent + AI Search | $0 | ~$1,260 | $0 | **~$1,260** | **~$15,120** |
-| 6 | CS + MCP → AI Search | ~$1,000 | ~$1,260 | $0 | **~$2,260** | **~$27,120** |
+| 5 | Declarative Agent + AI Search | $0 | ~$710 | $0 | **~$710** | **~$8,520** |
+| 6 | CS + MCP → AI Search | ~$1,000 | ~$710 | $0 | **~$1,710** | **~$20,520** |
 | 7 | Foundry Agent | $0 | ~$340 ⚠️ | $0 | **~$340** ⚠️ | **~$4,080** |
-| 8 | M365 Agents SDK | $0 | ~$1,260 | $0 | **~$1,260** | **~$15,120** |
+| 8 | M365 Agents SDK | $0 | ~$710 | $0 | **~$710** | **~$8,520** |
 
 > **How to read this table:**  
 > - Each row shows the **full standalone cost** of deploying that agent type from scratch.  
-> - **#5 and #6** use the same Azure infra (AI Search, APIM, VNet, OpenAI). If you deploy both, total Azure cost is still ~$1,260 (shared MCP server).  
+> - **#5 and #6** use the same Azure infra (AI Search, APIM, VNet, OpenAI). If you deploy both, total Azure cost is still ~$710 (shared MCP server).  
 > - **#8** uses the same shared infra as #5/#6 + its own Container App. If #5 is already deployed, #8 adds only ~$150/month.  
-> - **Combined #5 + #6 + #8**: ~$1,410/month Azure total (shared infra + 2 Container Apps).  
-> - **APIM note**: APIM Standard v2 (~$700/month) is the minimum tier that provides a static outbound IP address, required for IP-based firewall rules on AI Search. Basic v2 (~$150) does NOT have a static outbound IP.
+> - **Combined #5 + #6 + #8**: ~$860/month Azure total (shared infra + 2 Container Apps).  
+> - **APIM note**: The architecture requires a **static outbound IP** from APIM because the Container App has IP-based ingress filtering. APIM Classic Basic (~$147/month) provides a static IP and is sufficient for PoC and moderate workloads (~1,000 req/sec per unit, 2 units max). For production at scale, consider Classic Standard (~$687/month, ~2,500 req/sec, 4 units) or Classic Premium (~$2,795/month, VNet injection, multi-region). The v2 tiers (Basic v2, Standard v2) do **not** have a deterministic outbound IP and cannot be used in this architecture.
 >
 > **Ingestion costs** for 100 file changes/month: ~$2 (Doc Intelligence ~$1.50 + embeddings ~$0.07 + indexer runs: free with S1). **Negligible.**
 >
 > **Important notes:**  
 > - The 250 M365 Copilot licensed users ($7,500/month) are a **sunk cost** — not included above.  
-> - **#5** has $0 M365 cost for all 1,000 users — declarative agents are free for all M365 users. However, APIM Standard v2 (~$700/month) significantly increases the Azure infrastructure baseline.  
+> - **#5** has $0 M365 cost for all 1,000 users — declarative agents are free for all M365 users. APIM Classic Basic (~$147/month) keeps the Azure infrastructure baseline low.  
 > - **#7 (Foundry) ⚠️ Enterprise gaps** — Foundry Agent Service supports VNet isolation, private endpoints, BYO resources (AI Search, Storage, Cosmos DB), and Entra Agent ID with Conditional Access. However, it has **critical gaps**: (1) AI Search tool doesn't work through VNet (documented limitation), (2) no user OBO for AI Search (managed identity only — no per-user document-level security), (3) no APIM gateway integration. The SharePoint tool DOES support user OBO. Suitable for PoC and scenarios where per-user AI Search RBAC is not required.  
 > - **#8 includes the LLM model cost** — Azure OpenAI GPT-4o-mini for query rewriting + answer generation (~$20–40/month) is in the shared OpenAI line item.  
 > - **Dataverse is the cost killer** for #3/#4 — search indexes at ~$40/GB make 100 GB of docs cost ~$1,450–2,250/month.
@@ -496,9 +496,11 @@ flowchart TD
 | Azure OpenAI (text-embedding-3-large) | $0.00013/1K tokens | [Azure OpenAI pricing](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/) |
 | Azure OpenAI (GPT-4o-mini) | $0.15/1M input tokens | Same |
 | Azure Container Apps (Dedicated workload profile) | ~$150/month (enterprise) | [Container Apps pricing](https://azure.microsoft.com/en-us/pricing/details/container-apps/) |
-| APIM Basic v2 (dedicated outbound IP, no VNet) | ~$150/month, 10M requests included | [APIM pricing](https://azure.microsoft.com/en-us/pricing/details/api-management/) |
-| APIM Standard v2 (VNet integration) | ~$700/month, 50M requests included | Same |
-| APIM Consumption (classic, no dedicated IP) | ~$3.50/million calls | Same |
+| APIM Classic Basic (static outbound IP, ~1K req/sec, 2 units max — PoC/moderate) | ~$147/month | [APIM pricing](https://azure.microsoft.com/en-us/pricing/details/api-management/) |
+| APIM Classic Standard (static outbound IP, ~2.5K req/sec, 4 units — production) | ~$687/month | Same |
+| APIM Classic Premium (VNet injection, multi-region, zones — enterprise) | ~$2,795/month | Same |
+| APIM Basic v2 (no static IP — not suitable for IP-filtered backends) | ~$150/month | Same |
+| APIM Consumption (no static IP) | ~$3.50/million calls | Same |
 | NAT Gateway | ~$32/month + data processing ~$0.045/GB | [NAT Gateway pricing](https://azure.microsoft.com/en-us/pricing/details/azure-nat-gateway/) |
 | Dataverse storage (database) | $48/GB/month | [Dataverse pay-as-you-go meters](https://learn.microsoft.com/en-us/power-platform/admin/pay-as-you-go-meters) |
 | Dataverse storage (file) | $2.40/GB/month | Same |
